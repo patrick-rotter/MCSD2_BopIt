@@ -19,8 +19,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
-#include "CY8C201A0.h"
-#include <string.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -50,7 +48,7 @@ UART_HandleTypeDef huart2;
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
-  .stack_size = 128 * 4,
+  .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
@@ -144,11 +142,6 @@ int main(void)
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  CY8C201A0_hello_world("hello!\r\n");
-
-  uint8_t *msg = "local hello\r\n";
-
-  HAL_UART_Transmit(&huart2, msg, strlen((char *) msg), 1000);
 
   while (1)
   {
@@ -333,17 +326,45 @@ static void MX_GPIO_Init(void)
   * @retval None
   */
 /* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument) {
-	/* USER CODE BEGIN 5 */
-	uint8_t *msg = (uint8_t*) "local hello\r\n";
+void StartDefaultTask(void *argument)
+{
+  /* USER CODE BEGIN 5 */
+
 	/* Infinite loop */
 	for(;;) {
 		CY8C201A0_hello_world("hello!\r\n");
-		HAL_UART_Transmit(&huart2, msg, strlen((char *) msg), 1000);
+
+		uint8_t device_id = 1;//CY8_get_device_ID(hi2c1);
+
+		uint8_t id_msg[50] = {0};
+
+		/*sprintf((char *) id_msg, "Device id was found to be: %x\r\n", device_id);
+		HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);*/
 
 		osDelay(3500);
+
+		uint8_t ret;
+		sprintf((char *) id_msg, "Scanning i2c\r\n");
+		HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
+
+		for (int i = 1; i < 128; i++) {
+			ret = HAL_I2C_IsDeviceReady(&hi2c1, i << 1, 3, 10);
+			if (ret == HAL_OK) {
+				sprintf((char *) id_msg, "Device found at: %x\r\n", ret);
+				HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
+			} else if (ret == HAL_ERROR) {
+				HAL_UART_Transmit(&huart2, (uint8_t *) "- ", strlen((char *) "- "), 1000);
+			} else if (ret == HAL_BUSY) {
+				HAL_UART_Transmit(&huart2, (uint8_t *) "* ", strlen((char *) "* "), 1000);
+			}
+			osDelay(50);
+		}
+
+		sprintf((char *) id_msg, "Scanning done\r\n");
+		HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
+
 	}
-	/* USER CODE END 5 */
+  /* USER CODE END 5 */
 }
 
 /**
