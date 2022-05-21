@@ -20,6 +20,8 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "AS5013.h"
+#include <string.h>
+#include <stdio.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -49,7 +51,7 @@ UART_HandleTypeDef huart2;
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
-  .stack_size = 128 * 4,
+  .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
@@ -332,7 +334,20 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
+
 	  AS5013_hello_world((uint8_t *) "Joystick here\r\n");
+
+	  //uint8_t id_code = AS5013_get_id_code(hi2c1);
+
+	  uint8_t id_code = HAL_I2C_IsDeviceReady(&hi2c1, AS5013_I2C_ADDRESS, 10, 5);
+
+	  uint8_t msg[50] = {0};
+
+	  sprintf((char *) msg, "Device status code is %x\r\n", id_code);
+
+	  HAL_UART_Transmit(&huart2, msg, strlen((char *) msg), 1000);
+
+
 	  osDelay(4000);
   }
   /* USER CODE END 5 */
