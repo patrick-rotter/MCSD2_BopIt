@@ -3,7 +3,7 @@ import challenges from "./public/challenges.js";
 import { generateUniqueRandomNum } from "./libs/util.js";
 
 const app = express();
-const port = 5000;
+const port = 6000;
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
