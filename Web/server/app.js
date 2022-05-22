@@ -1,30 +1,12 @@
 import express from "express";
 import challenges from "./public/challenges.js";
+import { generateUniqueRandomNum } from "./libs/util.js";
 
 const app = express();
 const port = 5000;
-let randomNumber = 0;
-/* Initialize previous number with array.length + 1 
-to make sure every challenge can occur at the start */
-let previousNumber = challenges.length + 1;
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
-
-// Generate a random number (but different from previous random nubmer)
-const generateUniqueRandomNum = () => {
-  let isPreviousNumber = true;
-
-  while (isPreviousNumber) {
-    randomNumber = Math.floor(Math.random() * challenges.length);
-    if (randomNumber !== previousNumber) {
-      isPreviousNumber = false;
-    }
-  }
-
-  previousNumber = randomNumber;
-  return randomNumber;
-};
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static("client/build"));
