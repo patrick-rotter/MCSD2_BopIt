@@ -22,6 +22,17 @@ app.get(`/api/challenges`, async (req, res) => {
   return res.status(200).send(challenges[generateUniqueRandomNum()]);
 });
 
+// POST route for testing purposes only atm - logs the mcu and cmd sending the request
+app.post(`/api/challenges`, async (req, res) => {
+  console.log(req.body.mcu);
+  console.log(req.body.cmd);
+
+  return res.status(200).send({
+    error: false,
+  })
+})
+
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
