@@ -332,9 +332,13 @@ void StartDefaultTask(void *argument)
 {
 	/* USER CODE BEGIN 5 */
 	/* Infinite loop */
+	uint8_t msg[50];
 	for(;;) {
 		Si1153_hello_world((uint8_t *) "Files found\r\n");
 		osDelay(4000);
+		uint8_t part_id = Si1153_get_part_id(hi2c1);
+		sprintf((char *) msg, "Part id: %x\r\n", part_id);
+		HAL_UART_Transmit(&huart2, msg, strlen((char *) msg), 1000);
 	}
   /* USER CODE END 5 */
 }
