@@ -1,0 +1,31 @@
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card {
+  height: 700px;
+  width: 550px;
+  background-color: beige;
+  border-radius: 8px;
+  border-style: solid;
+  text-align: center;
+}
+
+.title {
+  font-family: "Roboto";
+  font-weight: 700;
+  font-size: 2rem;
+}
+
+.challenge-img {
+  max-width: 70%;
+  max-height: 70%;
+}
+
+.description {
+  font-family: "Roboto";
+  font-weight: 300;
+  font-size: 1.8rem;
+}
