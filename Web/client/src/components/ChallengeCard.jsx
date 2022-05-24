@@ -11,11 +11,21 @@ let demoCard = {
 };
 
 const ChallengeCard = () => {
+  // Get a random challenge from server (TODO: call periodically)
+  const handleClick = () => {
+    fetch("http://localhost:3003/api/challenges", {
+      method: "GET",
+    })
+      .then((res) => res.json())
+      .then((data) => console.log(data));
+  };
+
   return (
     <div className="card">
       <Title text={demoCard.title} />
       <Image url={demoCard.img} />
       <Description text={demoCard.description} />
+      <button onClick={handleClick}>Click</button>
     </div>
   );
 };
