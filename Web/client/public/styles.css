@@ -4,8 +4,12 @@ body {
   align-items: center;
 }
 
+h1 {
+  text-align: center;
+}
+
 .card {
-  height: 700px;
+  height: 600px;
   width: 550px;
   background-color: #EEEEEE;
   border-radius: 8px;
@@ -29,3 +33,9 @@ body {
   font-weight: 300;
   font-size: 1.8rem;
 }
+
+footer {
+  text-align: center;
+}
+
+
