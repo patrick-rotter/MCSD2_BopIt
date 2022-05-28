@@ -27,7 +27,15 @@ const ChallengeCard = () => {
   useEffect(() => {
     fetchChallenge();
     const eventSource = new EventSource("http://localhost:3003/api/subscribe");
-    eventSource.onmessage = (e) => console.log(e.data);
+    eventSource.onmessage = (e) => {
+      const eventData = JSON.parse(e.data)
+      console.log(eventData);
+      setChallenge({
+        mcu: eventData.module,
+        img: eventData.img,
+        description: eventData.description,
+      })
+    }
 
     return () => {
       eventSource.close();

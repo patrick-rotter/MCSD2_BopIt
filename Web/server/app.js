@@ -4,6 +4,7 @@ import { generateUniqueRandomNum } from "./libs/util.js";
 
 const app = express();
 const port = 3003;
+// Subscribed client to server sent events (with the option to add more than 1 client in the future)
 let client = {
   id: null,
   res: null
@@ -48,8 +49,8 @@ const addSubscriber = (req, res) => {
   client.res = res;
 };
 
-const sendChallenge = (msg) => {
-  client.res.write("data:" + JSON.stringify(msg));
+const sendChallenge = () => {
+  client.res.write("data:" + JSON.stringify({ ...challenges[generateUniqueRandomNum()] }));
   client.res.write("\n\n");
 };
 
@@ -60,8 +61,10 @@ const handleMCUPost = (req, res) => {
 
   const msg = req.body.cmd;
 
-  sendChallenge(msg);
-
+  if(msg === "13") {
+    sendChallenge();
+  }
+  
   return res.status(200).send({
     error: false,
   });
@@ -70,9 +73,9 @@ const handleMCUPost = (req, res) => {
 
 
 // Define endpoints
-app.get(`/api/challenges`, getRandomChallenge);
-app.get(`/api/subscribe`, addSubscriber);
-app.post(`/api/challenges`, handleMCUPost);
+app.get("/api/challenges", getRandomChallenge);
+app.get("/api/subscribe", addSubscriber);
+app.post("/api/challenges", handleMCUPost);
 
 // Start the app
 app.listen(port, () => {
