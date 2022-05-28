@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Title from "./Title";
 import Image from "./Image";
 import Description from "./Description";
@@ -10,8 +10,7 @@ const ChallengeCard = () => {
     description: "",
   });
 
-  // Get a random challenge from server (TODO: call periodically instead of button press)
-  const handleClick = () => {
+  const fetchChallenge = () => {
     fetch("http://localhost:3003/api/challenges", {
       method: "GET",
     })
@@ -25,12 +24,21 @@ const ChallengeCard = () => {
       );
   };
 
+  useEffect(() => {
+    fetchChallenge();
+    const eventSource = new EventSource("http://localhost:3003/api/subscribe");
+    eventSource.onmessage = (e) => console.log(e.data);
+
+    return () => {
+      eventSource.close();
+    };
+  }, []);
+
   return (
     <div className="card">
       <Title text={challenge.mcu} />
       <Image url={challenge.img} />
       <Description text={challenge.description} />
-      <button onClick={handleClick}>Click</button>
     </div>
   );
 };
