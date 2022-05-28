@@ -9,6 +9,7 @@ let client = {
   id: null,
   res: null
 };
+let currentChallenge = null
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
@@ -34,7 +35,8 @@ app.use(function (req, res, next) {
 
 // GET a random challenge
 const getRandomChallenge = (req, res) => {
-  return res.status(200).send(challenges[generateUniqueRandomNum()]);
+  currentChallenge = challenges[generateUniqueRandomNum()]
+  return res.status(200).send(currentChallenge);
 };
 
 // Subscribe to server sent events
@@ -49,8 +51,10 @@ const addSubscriber = (req, res) => {
   client.res = res;
 };
 
-const sendChallenge = () => {
-  client.res.write("data:" + JSON.stringify({ ...challenges[generateUniqueRandomNum()] }));
+// Send a new random challenge
+const sendNextChallenge = () => {
+  currentChallenge = challenges[generateUniqueRandomNum()]
+  client.res.write("data:" + JSON.stringify(currentChallenge));
   client.res.write("\n\n");
 };
 
@@ -59,18 +63,16 @@ const handleMCUPost = (req, res) => {
   console.log(req.body.mcu);
   console.log(req.body.cmd);
 
-  const msg = req.body.cmd;
+  const cmd = req.body.cmd;
 
-  if(msg === "13") {
-    sendChallenge();
+  if(cmd === currentChallenge.cmd) {
+    sendNextChallenge();
   }
   
   return res.status(200).send({
     error: false,
   });
 };
-
-
 
 // Define endpoints
 app.get("/api/challenges", getRandomChallenge);
