@@ -10,36 +10,38 @@ const ChallengeCard = () => {
     description: "",
   });
 
+  // Rerenders the challenge card
+  const updateChallenge = (data) => {
+    setChallenge({
+      mcu: data.module,
+      img: data.img,
+      description: data.description,
+    })
+  }
+
+  // Fetches a random challenge
   const fetchChallenge = () => {
     fetch("http://localhost:3003/api/challenges", {
       method: "GET",
     })
       .then((res) => res.json())
-      .then((data) =>
-        setChallenge({
-          mcu: data.module,
-          img: data.img,
-          description: data.description,
-        })
+      .then((data) => updateChallenge(data)
       );
   };
 
+  // Subscribes to sse to update the challenge on a sent event
   useEffect(() => {
     fetchChallenge();
     const eventSource = new EventSource("http://localhost:3003/api/subscribe");
     eventSource.onmessage = (e) => {
       const eventData = JSON.parse(e.data)
       console.log(eventData);
-      setChallenge({
-        mcu: eventData.module,
-        img: eventData.img,
-        description: eventData.description,
-      })
+      updateChallenge(eventData)
     }
-
     return () => {
       eventSource.close();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
