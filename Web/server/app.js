@@ -4,12 +4,21 @@ import { generateUniqueRandomNum } from "./libs/util.js";
 
 const app = express();
 const port = 3003;
-// Subscribed client to server sent events (with the option to add more than 1 client in the future)
+// Subscribed client to server sent events
+let clientRes = null;
 let client = {
-  id: null,
-  res: null
+  currentChallenge: null,
+  score: 0,
+  health: 3,
+  isAlive: true,
 };
-let currentChallenge = null
+
+const gameOver = {
+  cmd: "FeelsBadMan",
+  module: "Game over!",
+  img: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Skull-Icon.svg/800px-Skull-Icon.svg.png",
+  description: "GG, well played.",
+};
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
@@ -24,7 +33,7 @@ if (process.env.NODE_ENV === "production") {
 }
 
 // Bypass CORS to allow fetching data
-app.use(function (req, res, next) {
+app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header(
     "Access-Control-Allow-Headers",
@@ -35,8 +44,14 @@ app.use(function (req, res, next) {
 
 // GET a random challenge
 const getRandomChallenge = (req, res) => {
-  currentChallenge = challenges[generateUniqueRandomNum()]
-  return res.status(200).send(currentChallenge);
+  if (!client.isAlive) {
+    client.isAlive = true;
+    client.health = 3;
+    client.score = 0;
+  }
+
+  client.currentChallenge = challenges[generateUniqueRandomNum()];
+  return res.status(200).send(client);
 };
 
 // Subscribe to server sent events
@@ -47,15 +62,19 @@ const addSubscriber = (req, res) => {
   };
   res.writeHead(200, headers);
 
-  client.id = Date.now();
-  client.res = res;
+  clientRes = res;
 };
 
 // Send a new random challenge
-const sendNextChallenge = () => {
-  currentChallenge = challenges[generateUniqueRandomNum()]
-  client.res.write("data:" + JSON.stringify(currentChallenge));
-  client.res.write("\n\n");
+const sendNextChallenge = (isAlive) => {
+  if (isAlive) {
+    client.currentChallenge = challenges[generateUniqueRandomNum()];
+  } else {
+    client.currentChallenge = gameOver;
+  }
+
+  clientRes.write("data:" + JSON.stringify(client));
+  clientRes.write("\n\n");
 };
 
 // Handle MCU POST request
@@ -65,10 +84,16 @@ const handleMCUPost = (req, res) => {
 
   const cmd = req.body.cmd;
 
-  if(cmd === currentChallenge.cmd) {
-    sendNextChallenge();
+  if (cmd === client.currentChallenge.cmd) {
+    client.score++;
+  } else {
+    client.health--;
+    if (client.health === 0) {
+      client.isAlive = false;
+    }
   }
-  
+  sendNextChallenge(client.isAlive);
+
   return res.status(200).send({
     error: false,
   });
@@ -77,6 +102,7 @@ const handleMCUPost = (req, res) => {
 // Define endpoints
 app.get("/api/challenges", getRandomChallenge);
 app.get("/api/subscribe", addSubscriber);
+//app.post("/api/playAgain", resetGame);
 app.post("/api/challenges", handleMCUPost);
 
 // Start the app
