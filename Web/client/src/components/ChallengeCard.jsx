@@ -50,7 +50,7 @@ const ChallengeCard = () => {
       console.log(eventData);
       updateChallenge(eventData);
       setScore(eventData.score);
-      setHealth(eventData.health);
+      eventData.health > 0 ? setHealth(eventData.health) : setHealth(0)
       setIsAlive(eventData.isAlive);
     };
     return () => {
@@ -61,7 +61,7 @@ const ChallengeCard = () => {
 
   return (
     <div className="card">
-      <StatusBar points={score} lives={health} />
+      <StatusBar points={score} health={health} />
       <Title text={challenge.mcu} />
       <Image url={challenge.img} />
       <Description text={challenge.description} />
