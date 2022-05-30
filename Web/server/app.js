@@ -1,5 +1,5 @@
 import express from "express";
-import challenges from "./public/challenges.js";
+import challenges, { gameOver } from "./public/challenges.js";
 import { generateUniqueRandomNum } from "./libs/util.js";
 
 const app = express();
@@ -11,13 +11,6 @@ let client = {
   score: 0,
   health: 3,
   isAlive: true,
-};
-
-const gameOver = {
-  cmd: "FeelsBadMan",
-  module: "Game over!",
-  img: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Skull-Icon.svg/800px-Skull-Icon.svg.png",
-  description: "GG, well played.",
 };
 
 app.use(express.urlencoded({ extended: true }));
@@ -102,7 +95,6 @@ const handleMCUPost = (req, res) => {
 // Define endpoints
 app.get("/api/challenges", getRandomChallenge);
 app.get("/api/subscribe", addSubscriber);
-//app.post("/api/playAgain", resetGame);
 app.post("/api/challenges", handleMCUPost);
 
 // Start the app
