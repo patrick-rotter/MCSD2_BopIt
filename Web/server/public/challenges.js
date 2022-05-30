@@ -2,6 +2,13 @@ const distanceClick = "Distance Click";
 const joystickClick = "Joystick Click";
 const touchClick = "Touch Click";
 
+export const gameOver = {
+  cmd: "",
+  module: "Game over!",
+  img: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Skull-Icon.svg/800px-Skull-Icon.svg.png",
+  description: "GG, well played.",
+};
+
 const challenges = [
   {
     cmd: "11",
@@ -59,4 +66,5 @@ const challenges = [
   },
 ];
 
-export default challenges;
+export default challenges
+

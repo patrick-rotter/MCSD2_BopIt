@@ -50,7 +50,7 @@ const ChallengeCard = () => {
       console.log(eventData);
       updateChallenge(eventData);
       setScore(eventData.score);
-      eventData.health > 0 ? setHealth(eventData.health) : setHealth(0)
+      eventData.health > 0 ? setHealth(eventData.health) : setHealth(0);
       setIsAlive(eventData.isAlive);
     };
     return () => {
