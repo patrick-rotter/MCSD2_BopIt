@@ -337,9 +337,9 @@ void StartDefaultTask(void *argument)
 
 	  AS5013_hello_world((uint8_t *) "Joystick here\r\n");
 
-	  //uint8_t id_code = AS5013_get_id_code(hi2c1);
+	  uint8_t id_code = AS5013_get_id_code(hi2c1);
 
-	  uint8_t id_code = HAL_I2C_IsDeviceReady(&hi2c1, AS5013_I2C_ADDRESS, 10, 5);
+	  //uint8_t id_code = HAL_I2C_IsDeviceReady(&hi2c1, AS5013_I2C_ADDRESS, 10, 5);
 
 	  uint8_t msg[50] = {0};
 

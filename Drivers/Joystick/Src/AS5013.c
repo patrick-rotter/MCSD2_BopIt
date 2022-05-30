@@ -16,6 +16,7 @@ uint8_t AS5013_get_id_code(I2C_HandleTypeDef hi2c) {
 		return 2;
 	}
 
+
 	if (HAL_I2C_Master_Receive(&hi2c, AS5013_I2C_ADDRESS | 1, &retval, 1, 1000) != HAL_OK) {
 		return 3;
 	}

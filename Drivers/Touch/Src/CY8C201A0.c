@@ -11,6 +11,8 @@ uint8_t CY8_get_device_ID(I2C_HandleTypeDef hi2c) {
 
 	uint8_t device_register = CY8C201A0_DEVICE_ID_REG;
 
+
+	// The i2c master transmit function returns on line 1168, while waiting for the TXIS flag to be set
 	if (HAL_I2C_Master_Transmit(&hi2c, CY8C201A0_I2C_ADDRESS | 0 , &device_register, 1, 0) == HAL_ERROR) {
 		return 1;
 	}

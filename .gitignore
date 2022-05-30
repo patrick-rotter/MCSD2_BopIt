@@ -2,6 +2,7 @@
 */[Bb]inaries
 */[Dd]ebug
 */*Debug.launch
+.project
 
 # Datasheets, external documentation, PDFs
 Sensor_datasheets/

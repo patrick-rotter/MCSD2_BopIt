@@ -22,7 +22,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <string.h>
+#include <stdio.h>
+#include "CY8C201A0.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -334,12 +336,12 @@ void StartDefaultTask(void *argument)
 	for(;;) {
 		CY8C201A0_hello_world("hello!\r\n");
 
-		uint8_t device_id = 1;//CY8_get_device_ID(hi2c1);
+		uint8_t device_id = CY8_get_device_ID(hi2c1);
 
 		uint8_t id_msg[50] = {0};
 
-		/*sprintf((char *) id_msg, "Device id was found to be: %x\r\n", device_id);
-		HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);*/
+		sprintf((char *) id_msg, "Device id was found to be: %x\r\n", device_id);
+		HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
 
 		osDelay(3500);
 
