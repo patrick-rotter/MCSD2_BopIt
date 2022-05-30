@@ -19,13 +19,12 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
-#include "AS5013.h"
-#include <string.h>
-#include <stdio.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
+#include <string.h>
+#include "AS5013.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -347,7 +346,27 @@ void StartDefaultTask(void *argument)
 
 	  HAL_UART_Transmit(&huart2, msg, strlen((char *) msg), 1000);
 
+	  uint8_t id_msg[50] = {0};
 
+	  		uint8_t ret;
+	  				sprintf((char *) id_msg, "Scanning i2c\r\n");
+	  				HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
+
+	  				for (int i = 1; i < 128; i++) {
+	  					ret = HAL_I2C_IsDeviceReady(&hi2c1, i << 1, 3, 10);
+	  					if (ret == HAL_OK) {
+	  						sprintf((char *) id_msg, "Device found at: 0x%x\r\n", i);
+	  						HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
+	  					} else if (ret == HAL_ERROR) {
+	  						HAL_UART_Transmit(&huart2, (uint8_t *) "- ", strlen((char *) "- "), 1000);
+	  					} else if (ret == HAL_BUSY) {
+	  						HAL_UART_Transmit(&huart2, (uint8_t *) "* ", strlen((char *) "* "), 1000);
+	  					}
+	  					osDelay(50);
+	  				}
+
+	  				sprintf((char *) id_msg, "Scanning done\r\n");
+	  				HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
 	  osDelay(4000);
   }
   /* USER CODE END 5 */
