@@ -25,3 +25,36 @@ uint8_t CY8_get_device_ID(I2C_HandleTypeDef hi2c) {
 
 	return id;
 }
+
+
+uint8_t CY8_unlock_i2c_reg(I2C_HandleTypeDef hi2c) {
+	uint8_t unlock_seq[4] = {CY8C201A0_I2C_DEV_LOCK_REG, 0x3c, 0xa5, 0x69};
+
+	return HAL_I2C_Master_Transmit(&hi2c, 0, unlock_seq, 4, 1000);
+}
+
+uint8_t CY8_lock_i2c_reg(I2C_HandleTypeDef hi2c) {
+	uint8_t lock_seq[4] = {CY8C201A0_I2C_DEV_LOCK_REG, 0x96, 0x5a, 0xc3};
+
+	return HAL_I2C_Master_Transmit(&hi2c, 0, lock_seq, 4, 1000);
+}
+
+uint8_t CY8_set_i2c_addr(I2C_HandleTypeDef hi2c, uint8_t new_address) {
+	/* The new address cannot be wider than 7 bit */
+
+	if (!is_legal_i2c_addr(new_address)) {
+		return HAL_ERROR;
+	}
+
+	uint8_t command_seq[2] = { CY8C201A0_I2C_ADDRESS_REG, new_address };
+
+	return HAL_I2C_Master_Transmit(&hi2c, 0, command_seq, 2, 1000);
+}
+
+int is_legal_i2c_addr(uint8_t address) {
+	if ((address > 127) || (address < 10)) {
+		return 0;
+	}
+
+	return 1;
+}

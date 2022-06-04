@@ -330,6 +330,7 @@ static void MX_GPIO_Init(void)
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
+	//HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
   /* Infinite loop */
   for(;;)
   {
@@ -367,6 +368,12 @@ void StartDefaultTask(void *argument)
 
 	  				sprintf((char *) id_msg, "Scanning done\r\n");
 	  				HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
+	  				osDelay(500);
+
+	  				//uint8_t led_r = (uint8_t) HAL_GPIO_ReadPin(LED_RED_GPIO_Port, LED_RED_Pin);
+
+	  				//sprintf((char *) id_msg, "Red led: %d\r\n", led_r);
+	  				//HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
 	  osDelay(4000);
   }
   /* USER CODE END 5 */

@@ -336,23 +336,39 @@ void StartDefaultTask(void *argument)
 	for(;;) {
 		CY8C201A0_hello_world("hello!\r\n");
 
-		uint8_t device_id = CY8_get_device_ID(hi2c1);
-
 		uint8_t id_msg[50] = {0};
+
+		/*uint8_t device_id = CY8_get_device_ID(hi2c1);
+
+
 
 		sprintf((char *) id_msg, "Device id was found to be: %x\r\n", device_id);
 		HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
 
-		osDelay(3500);
+		osDelay(3500);*/
+
+
+		uint8_t unlock = CY8_unlock_i2c_reg(hi2c1);
+		sprintf((char *) id_msg, "Unlock result: %d\r\n", unlock);
+		HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
+
+		uint8_t set = CY8_set_i2c_addr(hi2c1, 0x23);
+		sprintf((char *) id_msg, "Address set result: %d\r\n", set);
+		HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
+
+		uint8_t lock = CY8_lock_i2c_reg(hi2c1);
+		sprintf((char *) id_msg, "Lock result: %d\r\n", lock);
+		HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
+
 
 		uint8_t ret;
 		sprintf((char *) id_msg, "Scanning i2c\r\n");
 		HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
 
-		for (int i = 1; i < 128; i++) {
+		for (int i = 0; i < 128; i++) {
 			ret = HAL_I2C_IsDeviceReady(&hi2c1, i << 1, 3, 10);
 			if (ret == HAL_OK) {
-				sprintf((char *) id_msg, "Device found at: %x\r\n", ret);
+				sprintf((char *) id_msg, "Device found at: 0x%x\r\n", i);
 				HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
 			} else if (ret == HAL_ERROR) {
 				HAL_UART_Transmit(&huart2, (uint8_t *) "- ", strlen((char *) "- "), 1000);
