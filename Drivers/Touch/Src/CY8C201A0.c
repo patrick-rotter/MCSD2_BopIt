@@ -8,6 +8,10 @@ void CY8C201A0_hello_world(char *echo_str) {
 }
 
 HAL_StatusTypeDef CY8_generic_write_single(I2C_HandleTypeDef *hi2c, uint8_t device_register, uint8_t data) {
+	if (NULL == hi2c) {
+		return HAL_ERROR;
+	}
+
 	uint8_t message[] = { device_register, data };
 
 	return HAL_I2C_Master_Transmit(hi2c, CY8C201A0_CUSTOM_I2C_ADDRESS | 1, message, 2, 1000);
@@ -45,6 +49,10 @@ HAL_StatusTypeDef CY8_enable_slider(I2C_HandleTypeDef *hi2c, uint8_t slider_pad_
 	}
 	return HAL_ERROR;
 
+}
+
+HAL_StatusTypeDef CY8_set_slider_resolution(I2C_HandleTypeDef *hi2c, uint8_t resolution_code) {
+	return CY8_generic_write_single(hi2c, CY8C201A0_SLIDER_RESOLUTION_0_REG, resolution_code);
 }
 
 

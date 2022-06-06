@@ -19,12 +19,23 @@
 /* Enable slider pads and determine their number (5 or 10) */
 #define CY8C201A0_CAPSENSE_SLIDER_CONFIG_REG 0x75
 
+#define CY8C201A0_SLIDER_RESOLUTION_0_REG 0x77
+#define CY8C201A0_SLIDER_RESOLUTION_1_REG 0x78
+
 #define CY8C201A0_I2C_DEV_LOCK_REG 0x79
 
 #define CY8C201A0_DEVICE_ID_REG 0x7a
 
 /* To write to 0x7c, register 0x79 must be unlocked. Changes to 0x7c will only be applied after 0x79 is locked again */
 #define CY8C201A0_I2C_ADDRESS_REG 0x7c
+
+#define CY8C201A0_COMMAND_REG 0xa0
+
+#define CY8C201A0_STORE_CONFIG_COMMAND 0x01
+#define CY8C201A0_FACTORY_RESTORE_COMMAND 0x02
+#define CY8C201A0_RECONFIG_DEVICE_COMMAND 0x06
+#define CY8C201A0_SET_OPMODE_NORMAL_COMMAND 0x07
+#define CY8C201A0_SET_OPMODE_SETUP_COMMAND 0x08
 
 extern UART_HandleTypeDef huart2;
 
@@ -36,6 +47,8 @@ HAL_StatusTypeDef CY8_generic_write_single(I2C_HandleTypeDef *hi2c, uint8_t devi
 HAL_StatusTypeDef CY8_get_device_ID(I2C_HandleTypeDef *hi2c, uint8_t *id_result);
 
 HAL_StatusTypeDef CY8_enable_slider(I2C_HandleTypeDef *hi2c, uint8_t slider_pad_number);
+
+HAL_StatusTypeDef CY8_set_slider_resolution(I2C_HandleTypeDef *hi2c, uint8_t resolution_code);
 
 /**
  * @brief Transmits the control sequence that unlocks the CY8C201A0's i²c address register.

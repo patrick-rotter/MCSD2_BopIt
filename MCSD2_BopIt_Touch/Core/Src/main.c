@@ -394,6 +394,14 @@ void StartDefaultTask(void *argument)
 			HAL_UART_Transmit(&huart2, (uint8_t *) "i2c error on slider set\r\n", strlen("i2c error on slider set\r\n"), 1000);
 		}
 
+		if (CY8_set_slider_resolution(&hi2c1, 0x10) == HAL_OK)
+		{
+			HAL_UART_Transmit(&huart2, (uint8_t *) "Slider resolution set\r\n", strlen("Slider resolution set\r\n"), 1000);
+		}
+		else
+		{
+			HAL_UART_Transmit(&huart2, (uint8_t *) "i2c error on slider resolution set\r\n", strlen("i2c error on slider resolution set\r\n"), 1000);
+		}
 
 
 
