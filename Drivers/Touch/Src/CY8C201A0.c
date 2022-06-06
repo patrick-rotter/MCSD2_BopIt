@@ -105,6 +105,10 @@ HAL_StatusTypeDef CY8_set_i2c_addr(I2C_HandleTypeDef hi2c, uint8_t old_address, 
 	return HAL_I2C_Master_Transmit(&hi2c, old_address << 1, command_seq, 2, 1000);
 }
 
+HAL_StatusTypeDef CY8_read_capsense_0(I2C_HandleTypeDef *hi2c, uint8_t *read_result) {
+	return CY8_generic_read_single(hi2c, CY8C201A0_READ_CAPSENSE_STATUS_0_REG, read_result);
+}
+
 int is_legal_i2c_addr(uint8_t address) {
 	if ((address > 127) || (address < 10)) {
 		return 0;

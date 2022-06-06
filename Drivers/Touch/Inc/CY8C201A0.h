@@ -49,7 +49,6 @@ HAL_StatusTypeDef CY8_send_command(I2C_HandleTypeDef *hi2c, uint8_t command_code
 
 HAL_StatusTypeDef CY8_set_normal_opmode(I2C_HandleTypeDef *hi2c);
 HAL_StatusTypeDef CY8_set_setup_opmode(I2C_HandleTypeDef *hi2c);
-
 HAL_StatusTypeDef CY8_store_current_config(I2C_HandleTypeDef *hi2c);
 
 /**
@@ -76,6 +75,8 @@ HAL_StatusTypeDef CY8_lock_i2c_reg(I2C_HandleTypeDef hi2c, uint8_t address);
  * CY8_unlock_i2c_reg(). Its results will only take effect after calling CY8_lock_i2c_reg().
  */
 HAL_StatusTypeDef CY8_set_i2c_addr(I2C_HandleTypeDef hi2c, uint8_t old_address, uint8_t new_address);
+
+HAL_StatusTypeDef CY8_read_capsense_0(I2C_HandleTypeDef *hi2c, uint8_t *read_result);
 
 void CY8C201A0_hello_world(char *echo_str);
 

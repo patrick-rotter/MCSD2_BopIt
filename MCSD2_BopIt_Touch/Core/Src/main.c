@@ -409,9 +409,19 @@ void StartDefaultTask(void *argument)
 			HAL_UART_Transmit(&huart2, (uint8_t *) "i2c error on slider resolution set\r\n", strlen("i2c error on slider resolution set\r\n"), 1000);
 		}
 
+		uint8_t cs0_read = 0;
 
+		if (CY8_read_capsense_0(&hi2c1, &cs0_read) == HAL_OK)
+		{
+			sprintf((char *) id_msg, "capsense 0 read result: 0x%x\r\n", cs0_read);
+			HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
+		}
+		else
+		{
+			HAL_UART_Transmit(&huart2, (uint8_t *) "i2c error on cp 0 read\r\n", strlen("i2c error on cp 0 read\r\n"), 1000);
+		}
 
-
+/*
 		sprintf((char *) id_msg, "Scanning i2c\r\n");
 		HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
 
@@ -429,7 +439,7 @@ void StartDefaultTask(void *argument)
 		}
 
 		sprintf((char *) id_msg, "Scanning done\r\n");
-		HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
+		HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000); */
 
 	}
   /* USER CODE END 5 */
