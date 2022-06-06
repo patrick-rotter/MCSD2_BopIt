@@ -331,12 +331,28 @@ static void MX_GPIO_Init(void)
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
+	uint8_t id_msg[50] = {0};
+
+
+	uint8_t unlock = CY8_unlock_i2c_reg(hi2c1, I2C_GENERAL_CALL_ADDRESS);
+	sprintf((char *) id_msg, "Unlock result: %d\r\n", unlock);
+	HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
+
+	uint8_t set = CY8_set_i2c_addr(hi2c1, I2C_GENERAL_CALL_ADDRESS, 0x23);
+	sprintf((char *) id_msg, "Address set result: %d\r\n", set);
+	HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
+
+	uint8_t lock = CY8_lock_i2c_reg(hi2c1, I2C_GENERAL_CALL_ADDRESS);
+	sprintf((char *) id_msg, "Lock result: %d\r\n", lock);
+	HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
+
 
 	/* Infinite loop */
 	for(;;) {
-		CY8C201A0_hello_world("hello!\r\n");
 
-		uint8_t id_msg[50] = {0};
+
+
+
 
 		uint8_t device_id = 0;
 
@@ -351,20 +367,10 @@ void StartDefaultTask(void *argument)
 
 		osDelay(3500);
 
-/*
-		uint8_t unlock = CY8_unlock_i2c_reg(hi2c1, I2C_GENERAL_CALL_ADDRESS);
-		sprintf((char *) id_msg, "Unlock result: %d\r\n", unlock);
-		HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
 
-		uint8_t set = CY8_set_i2c_addr(hi2c1, I2C_GENERAL_CALL_ADDRESS, 0x23);
-		sprintf((char *) id_msg, "Address set result: %d\r\n", set);
-		HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
 
-		uint8_t lock = CY8_lock_i2c_reg(hi2c1, I2C_GENERAL_CALL_ADDRESS);
-		sprintf((char *) id_msg, "Lock result: %d\r\n", lock);
-		HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
 
-*/
+
 		uint8_t ret = CY8_generic_write_single(&hi2c1, CY8C201A0_CAPSENSE_ENABLE_0_REG, 0x18);
 
 		if (ret == HAL_OK)

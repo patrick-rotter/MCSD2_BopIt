@@ -29,6 +29,9 @@
 /* To write to 0x7c, register 0x79 must be unlocked. Changes to 0x7c will only be applied after 0x79 is locked again */
 #define CY8C201A0_I2C_ADDRESS_REG 0x7c
 
+#define CY8C201A0_READ_CAPSENSE_STATUS_0_REG 0x88
+#define CY8C201A0_READ_CAPSENSE_STATUS_1_REG 0x89
+
 #define CY8C201A0_COMMAND_REG 0xa0
 
 #define CY8C201A0_STORE_CONFIG_COMMAND 0x01
@@ -43,6 +46,11 @@ HAL_StatusTypeDef CY8_generic_write_single(I2C_HandleTypeDef *hi2c, uint8_t devi
 HAL_StatusTypeDef CY8_generic_read_single(I2C_HandleTypeDef *hi2c, uint8_t device_register, uint8_t *data);
 
 HAL_StatusTypeDef CY8_send_command(I2C_HandleTypeDef *hi2c, uint8_t command_code);
+
+HAL_StatusTypeDef CY8_set_normal_opmode(I2C_HandleTypeDef *hi2c);
+HAL_StatusTypeDef CY8_set_setup_opmode(I2C_HandleTypeDef *hi2c);
+
+HAL_StatusTypeDef CY8_store_current_config(I2C_HandleTypeDef *hi2c);
 
 /**
  * @brief Performs a single read on the device's id register (0x7a).

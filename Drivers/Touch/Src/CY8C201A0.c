@@ -40,6 +40,24 @@ HAL_StatusTypeDef CY8_send_command(I2C_HandleTypeDef *hi2c, uint8_t command_code
 
 }
 
+HAL_StatusTypeDef CY8_set_normal_opmode(I2C_HandleTypeDef *hi2c) {
+
+	return CY8_send_command(hi2c, CY8C201A0_SET_OPMODE_NORMAL_COMMAND);
+
+}
+
+HAL_StatusTypeDef CY8_set_setup_opmode(I2C_HandleTypeDef *hi2c) {
+
+	return CY8_send_command(hi2c, CY8C201A0_SET_OPMODE_SETUP_COMMAND);
+
+}
+
+HAL_StatusTypeDef CY8_store_current_config(I2C_HandleTypeDef *hi2c) {
+
+	return CY8_send_command(hi2c, CY8C201A0_STORE_CONFIG_COMMAND);
+
+}
+
 HAL_StatusTypeDef CY8_get_device_ID(I2C_HandleTypeDef *hi2c, uint8_t *id_result) {
 
 	return CY8_generic_read_single(hi2c, CY8C201A0_DEVICE_ID_REG, id_result);
