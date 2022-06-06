@@ -340,7 +340,7 @@ void StartDefaultTask(void *argument)
 
 		uint8_t device_id = 0;
 
-		if (CY8_get_device_ID(&hi2c1, &device_id) == HAL_OK) {
+		if (CY8_get_device_ID(&hi2c1, &device_id) == HAL_OK) { // Should be 0xa0
 			sprintf((char *) id_msg, "Device id was found to be: %x\r\n", device_id);
 			HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
 		} else {
@@ -365,7 +365,39 @@ void StartDefaultTask(void *argument)
 		HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
 
 */
-		uint8_t ret;
+		uint8_t ret = CY8_generic_write_single(&hi2c1, CY8C201A0_CAPSENSE_ENABLE_0_REG, 0x18);
+
+		if (ret == HAL_OK)
+		{
+			HAL_UART_Transmit(&huart2, (uint8_t *) "Capsense bits 0 set\r\n", strlen("Capsense bits 0 set\r\n"), 1000);
+		}
+		else
+		{
+			HAL_UART_Transmit(&huart2, (uint8_t *) "i2c error on cp bit 0 set\r\n", strlen("i2c error on cp bit 0 set\r\n"), 1000);
+		}
+
+		if (CY8_generic_write_single(&hi2c1, CY8C201A0_CAPSENSE_ENABLE_1_REG, 0x1f))
+		{
+			HAL_UART_Transmit(&huart2, (uint8_t *) "Capsense bits 1 set\r\n", strlen("Capsense bits 1 set\r\n"), 1000);
+		}
+		else
+		{
+			HAL_UART_Transmit(&huart2, (uint8_t *) "i2c error on cp bit 1 set\r\n", strlen("i2c error on cp bit 1 set\r\n"), 1000);
+		}
+
+		if (CY8_enable_slider(&hi2c1, 5) == HAL_OK)
+		{
+			HAL_UART_Transmit(&huart2, (uint8_t *) "Slider config set\r\n", strlen("Slider config set\r\n"), 1000);
+		}
+		else
+		{
+			HAL_UART_Transmit(&huart2, (uint8_t *) "i2c error on slider set\r\n", strlen("i2c error on slider set\r\n"), 1000);
+		}
+
+
+
+
+
 		sprintf((char *) id_msg, "Scanning i2c\r\n");
 		HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
 

@@ -7,9 +7,16 @@ void CY8C201A0_hello_world(char *echo_str) {
 	HAL_UART_Transmit(&huart2, (uint8_t*) echo_str, strlen((char *) echo_str), 1000);
 }
 
+HAL_StatusTypeDef CY8_generic_write_single(I2C_HandleTypeDef *hi2c, uint8_t device_register, uint8_t data) {
+	uint8_t message[] = { device_register, data };
+
+	return HAL_I2C_Master_Transmit(hi2c, CY8C201A0_CUSTOM_I2C_ADDRESS | 1, message, 2, 1000);
+}
+
 HAL_StatusTypeDef CY8_get_device_ID(I2C_HandleTypeDef *hi2c, uint8_t *id_result) {
 
-	if (id_result == NULL) {
+	if ((id_result == NULL) || (hi2c == NULL))
+	{
 		return HAL_ERROR;
 	}
 
@@ -17,7 +24,8 @@ HAL_StatusTypeDef CY8_get_device_ID(I2C_HandleTypeDef *hi2c, uint8_t *id_result)
 
 
 	// The i2c master transmit function returns on line 1168, while waiting for the TXIS flag to be set
-	if (HAL_I2C_Master_Transmit(hi2c, CY8C201A0_CUSTOM_I2C_ADDRESS | 0 , &device_register, 1, 1000) == HAL_ERROR) {
+	if (HAL_I2C_Master_Transmit(hi2c, CY8C201A0_CUSTOM_I2C_ADDRESS | 0 , &device_register, 1, 1000) == HAL_ERROR)
+	{
 		return HAL_ERROR;
 	}
 
@@ -26,17 +34,30 @@ HAL_StatusTypeDef CY8_get_device_ID(I2C_HandleTypeDef *hi2c, uint8_t *id_result)
 
 }
 
+HAL_StatusTypeDef CY8_enable_slider(I2C_HandleTypeDef *hi2c, uint8_t slider_pad_number) {
+	if (slider_pad_number == 5)
+	{
+		return CY8_generic_write_single(hi2c, CY8C201A0_CAPSENSE_SLIDER_CONFIG_REG, 0x01);
+	}
+	else if (slider_pad_number == 10)
+	{
+		return CY8_generic_write_single(hi2c, CY8C201A0_CAPSENSE_SLIDER_CONFIG_REG, 0x03);
+	}
+	return HAL_ERROR;
+
+}
+
 
 HAL_StatusTypeDef CY8_unlock_i2c_reg(I2C_HandleTypeDef hi2c, uint8_t address) {
 	uint8_t unlock_seq[4] = {CY8C201A0_I2C_DEV_LOCK_REG, 0x3c, 0xa5, 0x69};
 
-	return HAL_I2C_Master_Transmit(&hi2c, address, unlock_seq, 4, 1000);
+	return HAL_I2C_Master_Transmit(&hi2c, address << 1, unlock_seq, 4, 1000);
 }
 
 HAL_StatusTypeDef CY8_lock_i2c_reg(I2C_HandleTypeDef hi2c, uint8_t address) {
 	uint8_t lock_seq[4] = {CY8C201A0_I2C_DEV_LOCK_REG, 0x96, 0x5a, 0xc3};
 
-	return HAL_I2C_Master_Transmit(&hi2c, address, lock_seq, 4, 1000);
+	return HAL_I2C_Master_Transmit(&hi2c, address << 1, lock_seq, 4, 1000);
 }
 
 HAL_StatusTypeDef CY8_set_i2c_addr(I2C_HandleTypeDef hi2c, uint8_t old_address, uint8_t new_address) {
@@ -47,7 +68,7 @@ HAL_StatusTypeDef CY8_set_i2c_addr(I2C_HandleTypeDef hi2c, uint8_t old_address, 
 
 	uint8_t command_seq[2] = { CY8C201A0_I2C_ADDRESS_REG, new_address };
 
-	return HAL_I2C_Master_Transmit(&hi2c, old_address, command_seq, 2, 1000);
+	return HAL_I2C_Master_Transmit(&hi2c, old_address << 1, command_seq, 2, 1000);
 }
 
 int is_legal_i2c_addr(uint8_t address) {

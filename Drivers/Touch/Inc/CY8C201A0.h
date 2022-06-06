@@ -8,19 +8,34 @@
 
 #define CY8C201A0_CUSTOM_I2C_ADDRESS (0x23 << 1)
 
-#define CY8C201A0_DEVICE_ID_REG 0x7a
+#define CY8C201A0_INPUT_0_REG 0x00
+#define CY8C201A0_INPUT_1_REG 0x01
+
+/* Enable standalone touchpads as touchsense pads */
+#define CY8C201A0_CAPSENSE_ENABLE_0_REG 0x06
+/* Enable slider touchpads as touchsense pads */
+#define CY8C201A0_CAPSENSE_ENABLE_1_REG 0x07
+
+/* Enable slider pads and determine their number (5 or 10) */
+#define CY8C201A0_CAPSENSE_SLIDER_CONFIG_REG 0x75
 
 #define CY8C201A0_I2C_DEV_LOCK_REG 0x79
+
+#define CY8C201A0_DEVICE_ID_REG 0x7a
 
 /* To write to 0x7c, register 0x79 must be unlocked. Changes to 0x7c will only be applied after 0x79 is locked again */
 #define CY8C201A0_I2C_ADDRESS_REG 0x7c
 
 extern UART_HandleTypeDef huart2;
 
+HAL_StatusTypeDef CY8_generic_write_single(I2C_HandleTypeDef *hi2c, uint8_t device_register, uint8_t data);
+
 /**
  * @brief Performs a single read on the device's id register (0x7a).
  */
 HAL_StatusTypeDef CY8_get_device_ID(I2C_HandleTypeDef *hi2c, uint8_t *id_result);
+
+HAL_StatusTypeDef CY8_enable_slider(I2C_HandleTypeDef *hi2c, uint8_t slider_pad_number);
 
 /**
  * @brief Transmits the control sequence that unlocks the CY8C201A0's i²c address register.
