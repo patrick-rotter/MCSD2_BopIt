@@ -17,33 +17,41 @@ HAL_StatusTypeDef CY8_generic_write_single(I2C_HandleTypeDef *hi2c, uint8_t devi
 	return HAL_I2C_Master_Transmit(hi2c, CY8C201A0_CUSTOM_I2C_ADDRESS | 1, message, 2, 1000);
 }
 
+HAL_StatusTypeDef CY8_generic_read_single(I2C_HandleTypeDef *hi2c, uint8_t device_register, uint8_t *data) {
+	if ((NULL == hi2c) || (NULL == data))
+	{
+		return HAL_ERROR;
+	}
+
+
+	HAL_StatusTypeDef transmit_retval = HAL_I2C_Master_Transmit(hi2c, CY8C201A0_CUSTOM_I2C_ADDRESS | 0, &device_register, 1, 1000);
+
+	if (HAL_OK != transmit_retval ) {
+		return transmit_retval;
+	}
+
+	return HAL_I2C_Master_Receive(hi2c, CY8C201A0_CUSTOM_I2C_ADDRESS | 1, data, 1, 1000);
+}
+
+
+HAL_StatusTypeDef CY8_send_command(I2C_HandleTypeDef *hi2c, uint8_t command_code) {
+
+	return CY8_generic_write_single(hi2c, CY8C201A0_COMMAND_REG, command_code);
+
+}
+
 HAL_StatusTypeDef CY8_get_device_ID(I2C_HandleTypeDef *hi2c, uint8_t *id_result) {
 
-	if ((id_result == NULL) || (hi2c == NULL))
-	{
-		return HAL_ERROR;
-	}
-
-	uint8_t device_register = CY8C201A0_DEVICE_ID_REG;
-
-
-	// The i2c master transmit function returns on line 1168, while waiting for the TXIS flag to be set
-	if (HAL_I2C_Master_Transmit(hi2c, CY8C201A0_CUSTOM_I2C_ADDRESS | 0 , &device_register, 1, 1000) == HAL_ERROR)
-	{
-		return HAL_ERROR;
-	}
-
-
-	return HAL_I2C_Master_Receive(hi2c, CY8C201A0_CUSTOM_I2C_ADDRESS | 1 , id_result, 1, 1000);
+	return CY8_generic_read_single(hi2c, CY8C201A0_DEVICE_ID_REG, id_result);
 
 }
 
 HAL_StatusTypeDef CY8_enable_slider(I2C_HandleTypeDef *hi2c, uint8_t slider_pad_number) {
-	if (slider_pad_number == 5)
+	if (5 == slider_pad_number)
 	{
 		return CY8_generic_write_single(hi2c, CY8C201A0_CAPSENSE_SLIDER_CONFIG_REG, 0x01);
 	}
-	else if (slider_pad_number == 10)
+	else if (10 == slider_pad_number)
 	{
 		return CY8_generic_write_single(hi2c, CY8C201A0_CAPSENSE_SLIDER_CONFIG_REG, 0x03);
 	}

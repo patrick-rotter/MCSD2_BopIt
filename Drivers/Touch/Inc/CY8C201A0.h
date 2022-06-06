@@ -40,6 +40,9 @@
 extern UART_HandleTypeDef huart2;
 
 HAL_StatusTypeDef CY8_generic_write_single(I2C_HandleTypeDef *hi2c, uint8_t device_register, uint8_t data);
+HAL_StatusTypeDef CY8_generic_read_single(I2C_HandleTypeDef *hi2c, uint8_t device_register, uint8_t *data);
+
+HAL_StatusTypeDef CY8_send_command(I2C_HandleTypeDef *hi2c, uint8_t command_code);
 
 /**
  * @brief Performs a single read on the device's id register (0x7a).
