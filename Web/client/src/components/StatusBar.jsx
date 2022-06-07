@@ -3,7 +3,7 @@ import React from "react";
 const StatusBar = (props) => {
   return (
     <div className="status-bar">
-      <span>Score: {props.points}</span>
+      <div className="score-el">Score: {props.points}</div>
       <div>
         {Array(props.health)
           .fill(0)
@@ -12,7 +12,6 @@ const StatusBar = (props) => {
               src={process.env.PUBLIC_URL + "/pixel-heart.png"}
               alt="pixel-heart"
               height="40"
-              widht="40"
             ></img>
           ))}
       </div>

@@ -1,7 +1,6 @@
 body {
   display: flex;
   justify-content: center;
-  align-items: center;
 }
 
 h1 {
@@ -16,8 +15,6 @@ h1 {
   height: 600px;
   width: 550px;
   background-color: #eeeeee;
-  border-radius: 8px;
-  border-style: solid;
   text-align: center;
 }
 
@@ -40,9 +37,15 @@ h1 {
 
 .status-bar {
   height: 40px;
+  padding: 0 10px 0 10px;
   background-color: lightgrey;
   display: flex;
   justify-content: space-between;
+}
+
+.score-el {
+  font-family: "Roboto", Arial;
+  line-height: 40px;
 }
 
 footer {
