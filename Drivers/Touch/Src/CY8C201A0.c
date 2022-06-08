@@ -66,7 +66,7 @@ HAL_StatusTypeDef CY8_store_current_config(I2C_HandleTypeDef *hi2c) {
 
 }
 
-HAL_StatusTypeDef CY8_Init(	I2C_HandleTypeDef *hi2c,
+HAL_StatusTypeDef CY8_init(	I2C_HandleTypeDef *hi2c,
 							UART_HandleTypeDef *huart,
 							uint8_t capsense_0_config,
 							uint8_t capsense_1_config,

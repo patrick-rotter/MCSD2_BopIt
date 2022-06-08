@@ -52,13 +52,39 @@ extern UART_HandleTypeDef huart2;
 HAL_StatusTypeDef CY8_generic_write_single(I2C_HandleTypeDef *hi2c, uint8_t device_register, uint8_t data);
 HAL_StatusTypeDef CY8_generic_read_single(I2C_HandleTypeDef *hi2c, uint8_t device_register, uint8_t *data);
 
+/**
+ * @brief Sends a command code to the sensor and blocks the calling task for CY8C201A0_COMMAND_WAIT_TIME_MS if the code was
+ * transmitted correctly.
+ */
 HAL_StatusTypeDef CY8_send_command(I2C_HandleTypeDef *hi2c, uint8_t command_code);
 
+/**
+ * @brief Because this function executes a sensor command, it blocks the calling task for a short period if successful.
+ */
 HAL_StatusTypeDef CY8_set_normal_opmode(I2C_HandleTypeDef *hi2c);
+
+/**
+ * @brief Because this function executes a sensor command, it blocks the calling task for a short period if successful.
+ */
 HAL_StatusTypeDef CY8_set_setup_opmode(I2C_HandleTypeDef *hi2c);
+
+/**
+ * @brief Because this function executes a sensor command, it blocks the calling task for a short period if successful.
+ */
 HAL_StatusTypeDef CY8_store_current_config(I2C_HandleTypeDef *hi2c);
 
-HAL_StatusTypeDef CY8_Init(	I2C_HandleTypeDef *hi2c,
+/**
+ * @brief Initialises the CY8C201A0 to i²c address 0x23 and attempts to save the settings to flash. If successful, the sensor
+ * will be left in normal operation mode.
+ *
+ * @param hi2c The sensor's i²c connection.
+ * @param huart Currently does nothing, may be used for logging in the future.
+ * @param capsense_0_config Bitmask determining the active capsense 0 buttons. See the CY8C201A0_CAPSENSE_0_CONFIG_* macros.
+ * @param capsense_1_config Bitmask determining the active capsense 1 buttons. See the CY8C201A0_CAPSENSE_1_CONFIG_* macros.
+ * @param slider_pad_number The number of slider pads present on the sensor's midsection. Can be either 5 or 10.
+ * @param resolution_code Determines the resolution of the results when reading the slider's touch status.
+ */
+HAL_StatusTypeDef CY8_init(	I2C_HandleTypeDef *hi2c,
 							UART_HandleTypeDef *huart,
 							uint8_t capsense_0_config,
 							uint8_t capsense_1_config,

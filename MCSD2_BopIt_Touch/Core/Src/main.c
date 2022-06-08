@@ -333,21 +333,8 @@ void StartDefaultTask(void *argument)
   /* USER CODE BEGIN 5 */
 	uint8_t id_msg[50] = {0};
 
-/*
-	uint8_t unlock = CY8_unlock_i2c_reg(&hi2c1, I2C_GENERAL_CALL_ADDRESS);
-	sprintf((char *) id_msg, "Unlock result: %d\r\n", unlock);
-	HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
 
-	uint8_t set = CY8_set_i2c_addr(&hi2c1, I2C_GENERAL_CALL_ADDRESS, 0x23);
-	sprintf((char *) id_msg, "Address set result: %d\r\n", set);
-	HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
-
-	uint8_t lock = CY8_lock_i2c_reg(&hi2c1, I2C_GENERAL_CALL_ADDRESS);
-	sprintf((char *) id_msg, "Lock result: %d\r\n", lock);
-	HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
-*/
-
-	HAL_StatusTypeDef init_result = CY8_Init(	&hi2c1,
+	HAL_StatusTypeDef init_result = CY8_init(	&hi2c1,
 												&huart2,
 												CY8C201A0_CAPSENSE_0_CONFIG_TOP | CY8C201A0_CAPSENSE_0_CONFIG_BOTTOM,
 												CY8C201A0_CAPSENSE_1_CONFIG_ALL,
@@ -367,13 +354,10 @@ void StartDefaultTask(void *argument)
 	for(;;) {
 
 
-
-
-
 		uint8_t device_id = 0;
 
 		if (CY8_get_device_ID(&hi2c1, &device_id) == HAL_OK) { // Should be 0xa0
-			sprintf((char *) id_msg, "Device id was found to be: %x\r\n", device_id);
+			sprintf((char *) id_msg, "Device id was found to be: 0x%x\r\n", device_id);
 			HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
 		} else {
 			HAL_UART_Transmit(&huart2, (uint8_t *) "i2c error\r\n", strlen("i2c error\r\n"), 1000);
@@ -396,44 +380,6 @@ void StartDefaultTask(void *argument)
 		osDelay(3500);
 
 
-/*
-		if (HAL_OK == CY8_set_capsense_0_config(&hi2c1, CY8C201A0_CAPSENSE_0_CONFIG_TOP | CY8C201A0_CAPSENSE_0_CONFIG_BOTTOM))
-		{
-			HAL_UART_Transmit(&huart2, (uint8_t *) "Capsense bits 0 set\r\n", strlen("Capsense bits 0 set\r\n"), 1000);
-		}
-		else
-		{
-			HAL_UART_Transmit(&huart2, (uint8_t *) "i2c error on cp bit 0 set\r\n", strlen("i2c error on cp bit 0 set\r\n"), 1000);
-		}
-
-		if (CY8_generic_write_single(&hi2c1, CY8C201A0_CAPSENSE_ENABLE_1_REG, 0x1f))
-		{
-			HAL_UART_Transmit(&huart2, (uint8_t *) "Capsense bits 1 set\r\n", strlen("Capsense bits 1 set\r\n"), 1000);
-		}
-		else
-		{
-			HAL_UART_Transmit(&huart2, (uint8_t *) "i2c error on cp bit 1 set\r\n", strlen("i2c error on cp bit 1 set\r\n"), 1000);
-		}
-
-		if (CY8_enable_slider(&hi2c1, 5) == HAL_OK)
-		{
-			HAL_UART_Transmit(&huart2, (uint8_t *) "Slider config set\r\n", strlen("Slider config set\r\n"), 1000);
-		}
-		else
-		{
-			HAL_UART_Transmit(&huart2, (uint8_t *) "i2c error on slider set\r\n", strlen("i2c error on slider set\r\n"), 1000);
-		}
-
-		if (CY8_set_slider_resolution(&hi2c1, 0x10) == HAL_OK)
-		{
-			HAL_UART_Transmit(&huart2, (uint8_t *) "Slider resolution set\r\n", strlen("Slider resolution set\r\n"), 1000);
-		}
-		else
-		{
-			HAL_UART_Transmit(&huart2, (uint8_t *) "i2c error on slider resolution set\r\n", strlen("i2c error on slider resolution set\r\n"), 1000);
-		}
-
-		*/
 
 /*
 		sprintf((char *) id_msg, "Scanning i2c\r\n");
