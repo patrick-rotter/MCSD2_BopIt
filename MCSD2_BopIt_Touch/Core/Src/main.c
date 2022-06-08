@@ -333,19 +333,35 @@ void StartDefaultTask(void *argument)
   /* USER CODE BEGIN 5 */
 	uint8_t id_msg[50] = {0};
 
-
-	uint8_t unlock = CY8_unlock_i2c_reg(hi2c1, I2C_GENERAL_CALL_ADDRESS);
+/*
+	uint8_t unlock = CY8_unlock_i2c_reg(&hi2c1, I2C_GENERAL_CALL_ADDRESS);
 	sprintf((char *) id_msg, "Unlock result: %d\r\n", unlock);
 	HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
 
-	uint8_t set = CY8_set_i2c_addr(hi2c1, I2C_GENERAL_CALL_ADDRESS, 0x23);
+	uint8_t set = CY8_set_i2c_addr(&hi2c1, I2C_GENERAL_CALL_ADDRESS, 0x23);
 	sprintf((char *) id_msg, "Address set result: %d\r\n", set);
 	HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
 
-	uint8_t lock = CY8_lock_i2c_reg(hi2c1, I2C_GENERAL_CALL_ADDRESS);
+	uint8_t lock = CY8_lock_i2c_reg(&hi2c1, I2C_GENERAL_CALL_ADDRESS);
 	sprintf((char *) id_msg, "Lock result: %d\r\n", lock);
 	HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
+*/
 
+	HAL_StatusTypeDef init_result = CY8_Init(	&hi2c1,
+												&huart2,
+												CY8C201A0_CAPSENSE_0_CONFIG_TOP | CY8C201A0_CAPSENSE_0_CONFIG_BOTTOM,
+												CY8C201A0_CAPSENSE_1_CONFIG_ALL,
+												5,
+												0x10);
+
+	if (HAL_OK == init_result)
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "CY8 init success\r\n", strlen("CY8 init success\r\n"), 1000);
+	}
+	else
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "CY8 init failure\r\n", strlen("CY8 init success\r\n"), 1000);
+	}
 
 	/* Infinite loop */
 	for(;;) {
@@ -364,16 +380,24 @@ void StartDefaultTask(void *argument)
 		}
 
 
+		uint8_t cs0_read = 0;
+
+		if (CY8_read_capsense_0(&hi2c1, &cs0_read) == HAL_OK)
+		{
+		sprintf((char *) id_msg, "capsense 0 read result: 0x%x\r\n", cs0_read);
+		HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
+		}
+		else
+		{
+			HAL_UART_Transmit(&huart2, (uint8_t *) "i2c error on cp 0 read\r\n", strlen("i2c error on cp 0 read\r\n"), 1000);
+		}
+
 
 		osDelay(3500);
 
 
-
-
-
-		uint8_t ret = CY8_generic_write_single(&hi2c1, CY8C201A0_CAPSENSE_ENABLE_0_REG, 0x18);
-
-		if (ret == HAL_OK)
+/*
+		if (HAL_OK == CY8_set_capsense_0_config(&hi2c1, CY8C201A0_CAPSENSE_0_CONFIG_TOP | CY8C201A0_CAPSENSE_0_CONFIG_BOTTOM))
 		{
 			HAL_UART_Transmit(&huart2, (uint8_t *) "Capsense bits 0 set\r\n", strlen("Capsense bits 0 set\r\n"), 1000);
 		}
@@ -409,17 +433,7 @@ void StartDefaultTask(void *argument)
 			HAL_UART_Transmit(&huart2, (uint8_t *) "i2c error on slider resolution set\r\n", strlen("i2c error on slider resolution set\r\n"), 1000);
 		}
 
-		uint8_t cs0_read = 0;
-
-		if (CY8_read_capsense_0(&hi2c1, &cs0_read) == HAL_OK)
-		{
-			sprintf((char *) id_msg, "capsense 0 read result: 0x%x\r\n", cs0_read);
-			HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
-		}
-		else
-		{
-			HAL_UART_Transmit(&huart2, (uint8_t *) "i2c error on cp 0 read\r\n", strlen("i2c error on cp 0 read\r\n"), 1000);
-		}
+		*/
 
 /*
 		sprintf((char *) id_msg, "Scanning i2c\r\n");

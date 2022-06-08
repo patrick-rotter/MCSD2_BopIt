@@ -29,6 +29,7 @@
 /* To write to 0x7c, register 0x79 must be unlocked. Changes to 0x7c will only be applied after 0x79 is locked again */
 #define CY8C201A0_I2C_ADDRESS_REG 0x7c
 
+/* Used to read the pad touch status */
 #define CY8C201A0_READ_CAPSENSE_STATUS_0_REG 0x88
 #define CY8C201A0_READ_CAPSENSE_STATUS_1_REG 0x89
 
@@ -39,6 +40,12 @@
 #define CY8C201A0_RECONFIG_DEVICE_COMMAND 0x06
 #define CY8C201A0_SET_OPMODE_NORMAL_COMMAND 0x07
 #define CY8C201A0_SET_OPMODE_SETUP_COMMAND 0x08
+
+#define CY8C201A0_COMMAND_WAIT_TIME_MS 125
+
+#define CY8C201A0_CAPSENSE_0_CONFIG_TOP (1 << 3)
+#define CY8C201A0_CAPSENSE_0_CONFIG_BOTTOM (1 << 4)
+#define CY8C201A0_CAPSENSE_1_CONFIG_ALL (0x1f)
 
 extern UART_HandleTypeDef huart2;
 
@@ -51,32 +58,55 @@ HAL_StatusTypeDef CY8_set_normal_opmode(I2C_HandleTypeDef *hi2c);
 HAL_StatusTypeDef CY8_set_setup_opmode(I2C_HandleTypeDef *hi2c);
 HAL_StatusTypeDef CY8_store_current_config(I2C_HandleTypeDef *hi2c);
 
+HAL_StatusTypeDef CY8_Init(	I2C_HandleTypeDef *hi2c,
+							UART_HandleTypeDef *huart,
+							uint8_t capsense_0_config,
+							uint8_t capsense_1_config,
+							uint8_t slider_pad_number,
+							uint8_t resolution_code);
+
 /**
  * @brief Performs a single read on the device's id register (0x7a).
  */
 HAL_StatusTypeDef CY8_get_device_ID(I2C_HandleTypeDef *hi2c, uint8_t *id_result);
 
+/**
+ * @brief Enables the sensor's slider and sets the number of pads.
+ *
+ * @param slider_pad_number The number of slider pads present on the sensor's midsection. Can be either 5 or 10.
+ */
 HAL_StatusTypeDef CY8_enable_slider(I2C_HandleTypeDef *hi2c, uint8_t slider_pad_number);
 
 HAL_StatusTypeDef CY8_set_slider_resolution(I2C_HandleTypeDef *hi2c, uint8_t resolution_code);
 
 /**
  * @brief Transmits the control sequence that unlocks the CY8C201A0's i²c address register.
+ *
+ * @param address The CY8C201A0's i²c address at time of calling.
  */
-HAL_StatusTypeDef CY8_unlock_i2c_reg(I2C_HandleTypeDef hi2c, uint8_t address);
+HAL_StatusTypeDef CY8_unlock_i2c_reg(I2C_HandleTypeDef *hi2c, uint8_t address);
 
 /**
  * @brief Transmits the control sequence that locks the CY8C201A0's i²c address register.
+ *
+ * @param address The CY8C201A0's i²c address at time of calling. Note that any changes to the address will not
+ * take effect until after this function has been called.
  */
-HAL_StatusTypeDef CY8_lock_i2c_reg(I2C_HandleTypeDef hi2c, uint8_t address);
+HAL_StatusTypeDef CY8_lock_i2c_reg(I2C_HandleTypeDef *hi2c, uint8_t address);
 
 /**
  * @brief Writes the device's new i²c address to the appropriate register. This function should only be called after
  * CY8_unlock_i2c_reg(). Its results will only take effect after calling CY8_lock_i2c_reg().
  */
-HAL_StatusTypeDef CY8_set_i2c_addr(I2C_HandleTypeDef hi2c, uint8_t old_address, uint8_t new_address);
+HAL_StatusTypeDef CY8_set_i2c_addr(I2C_HandleTypeDef *hi2c, uint8_t old_address, uint8_t new_address);
+
+HAL_StatusTypeDef CY8_set_capsense_0_config(I2C_HandleTypeDef *hi2c, uint8_t config);
+
+HAL_StatusTypeDef CY8_set_capsense_1_config(I2C_HandleTypeDef *hi2c, uint8_t config);
 
 HAL_StatusTypeDef CY8_read_capsense_0(I2C_HandleTypeDef *hi2c, uint8_t *read_result);
+
+HAL_StatusTypeDef CY8_read_capsense_1(I2C_HandleTypeDef *hi2c, uint8_t *read_result);
 
 void CY8C201A0_hello_world(char *echo_str);
 
