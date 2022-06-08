@@ -46,12 +46,24 @@ I2C_HandleTypeDef hi2c1;
 
 UART_HandleTypeDef huart2;
 
-/* Definitions for defaultTask */
-osThreadId_t defaultTaskHandle;
-const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
+/* Definitions for touchSensorTask */
+osThreadId_t touchSensorTaskHandle;
+const osThreadAttr_t touchSensorTask_attributes = {
+  .name = "touchSensorTask",
+  .stack_size = 512 * 4,
+  .priority = (osPriority_t) osPriorityHigh,
+};
+/* Definitions for WiFiDispatcherT */
+osThreadId_t WiFiDispatcherTHandle;
+const osThreadAttr_t WiFiDispatcherT_attributes = {
+  .name = "WiFiDispatcherT",
   .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for touch_event_queue */
+osMessageQueueId_t touch_event_queueHandle;
+const osMessageQueueAttr_t touch_event_queue_attributes = {
+  .name = "touch_event_queue"
 };
 /* USER CODE BEGIN PV */
 
@@ -62,7 +74,8 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_I2C1_Init(void);
-void StartDefaultTask(void *argument);
+void start_touch_sensor_task(void *argument);
+void start_wifi_dispatcher_task(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -122,13 +135,20 @@ int main(void)
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
 
+  /* Create the queue(s) */
+  /* creation of touch_event_queue */
+  touch_event_queueHandle = osMessageQueueNew (16, sizeof(uint16_t), &touch_event_queue_attributes);
+
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  /* creation of touchSensorTask */
+  touchSensorTaskHandle = osThreadNew(start_touch_sensor_task, NULL, &touchSensorTask_attributes);
+
+  /* creation of WiFiDispatcherT */
+  WiFiDispatcherTHandle = osThreadNew(start_wifi_dispatcher_task, NULL, &WiFiDispatcherT_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -321,14 +341,14 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_StartDefaultTask */
+/* USER CODE BEGIN Header_start_touch_sensor_task */
 /**
-  * @brief  Function implementing the defaultTask thread.
+  * @brief  Function implementing the touchSensorTask thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument)
+/* USER CODE END Header_start_touch_sensor_task */
+void start_touch_sensor_task(void *argument)
 {
   /* USER CODE BEGIN 5 */
 	uint8_t id_msg[50] = {0};
@@ -403,6 +423,24 @@ void StartDefaultTask(void *argument)
 
 	}
   /* USER CODE END 5 */
+}
+
+/* USER CODE BEGIN Header_start_wifi_dispatcher_task */
+/**
+* @brief Function implementing the WiFiDispatcherT thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_start_wifi_dispatcher_task */
+void start_wifi_dispatcher_task(void *argument)
+{
+  /* USER CODE BEGIN start_wifi_dispatcher_task */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END start_wifi_dispatcher_task */
 }
 
 /**

@@ -4,10 +4,6 @@
 #include "main.h"
 #include "cmsis_os.h"
 
-void CY8C201A0_hello_world(char *echo_str) {
-	HAL_UART_Transmit(&huart2, (uint8_t*) echo_str, strlen((char *) echo_str), 1000);
-}
-
 HAL_StatusTypeDef CY8_generic_write_single(I2C_HandleTypeDef *hi2c, uint8_t device_register, uint8_t data) {
 	if (NULL == hi2c) {
 		return HAL_ERROR;
@@ -27,7 +23,8 @@ HAL_StatusTypeDef CY8_generic_read_single(I2C_HandleTypeDef *hi2c, uint8_t devic
 
 	HAL_StatusTypeDef transmit_retval = HAL_I2C_Master_Transmit(hi2c, CY8C201A0_CUSTOM_I2C_ADDRESS | 0, &device_register, 1, 1000);
 
-	if (HAL_OK != transmit_retval ) {
+	if (HAL_OK != transmit_retval )
+	{
 		return transmit_retval;
 	}
 

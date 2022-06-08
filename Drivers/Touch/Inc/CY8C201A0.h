@@ -1,4 +1,3 @@
-// I2C 1
 #include "main.h"
 
 #ifndef CY8C201A0
@@ -37,7 +36,7 @@
 
 #define CY8C201A0_STORE_CONFIG_COMMAND 0x01
 #define CY8C201A0_FACTORY_RESTORE_COMMAND 0x02
-#define CY8C201A0_RECONFIG_DEVICE_COMMAND 0x06
+#define CY8C201A0_APPLY_CONFIG_COMMAND 0x06
 #define CY8C201A0_SET_OPMODE_NORMAL_COMMAND 0x07
 #define CY8C201A0_SET_OPMODE_SETUP_COMMAND 0x08
 
@@ -67,6 +66,11 @@ HAL_StatusTypeDef CY8_set_normal_opmode(I2C_HandleTypeDef *hi2c);
  * @brief Because this function executes a sensor command, it blocks the calling task for a short period if successful.
  */
 HAL_StatusTypeDef CY8_set_setup_opmode(I2C_HandleTypeDef *hi2c);
+
+/**
+ * @brief Re-loads the configuration stored in the sensor's registers.
+ */
+HAL_StatusTypeDef CY8_apply_config(I2C_HandleTypeDef *hi2c);
 
 /**
  * @brief Because this function executes a sensor command, it blocks the calling task for a short period if successful.
@@ -133,8 +137,6 @@ HAL_StatusTypeDef CY8_set_capsense_1_config(I2C_HandleTypeDef *hi2c, uint8_t con
 HAL_StatusTypeDef CY8_read_capsense_0(I2C_HandleTypeDef *hi2c, uint8_t *read_result);
 
 HAL_StatusTypeDef CY8_read_capsense_1(I2C_HandleTypeDef *hi2c, uint8_t *read_result);
-
-void CY8C201A0_hello_world(char *echo_str);
 
 /**
  * @brief Performs a very crude check: is the given address between 10 and 127?

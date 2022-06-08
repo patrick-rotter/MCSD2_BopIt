@@ -1,7 +1,9 @@
 #MicroXplorer Configuration settings - do not modify
-FREERTOS.FootprintOK=true
-FREERTOS.IPParameters=Tasks01,configUSE_NEWLIB_REENTRANT,FootprintOK
-FREERTOS.Tasks01=defaultTask,24,512,StartDefaultTask,Default,NULL,Dynamic,NULL,NULL
+FREERTOS.FootprintOK=false
+FREERTOS.IPParameters=Tasks01,configUSE_NEWLIB_REENTRANT,FootprintOK,Queues01,configTOTAL_HEAP_SIZE
+FREERTOS.Queues01=touch_event_queue,16,uint16_t,0,Dynamic,NULL,NULL
+FREERTOS.Tasks01=touchSensorTask,40,512,start_touch_sensor_task,Default,NULL,Dynamic,NULL,NULL;WiFiDispatcherT,24,512,start_wifi_dispatcher_task,Default,NULL,Dynamic,NULL,NULL
+FREERTOS.configTOTAL_HEAP_SIZE=6000
 FREERTOS.configUSE_NEWLIB_REENTRANT=1
 File.Version=6
 I2C1.IPParameters=Timing
@@ -121,7 +123,7 @@ ProjectManager.StackSize=0x400
 ProjectManager.TargetToolchain=STM32CubeIDE
 ProjectManager.ToolChainLocation=
 ProjectManager.UnderRoot=true
-ProjectManager.functionlistsort=1-MX_GPIO_Init-GPIO-false-HAL-true,2-SystemClock_Config-RCC-false-HAL-false,3-MX_USART2_UART_Init-USART2-false-HAL-true
+ProjectManager.functionlistsort=1-MX_GPIO_Init-GPIO-false-HAL-true,2-SystemClock_Config-RCC-false-HAL-false,3-MX_USART2_UART_Init-USART2-false-HAL-true,4-MX_I2C1_Init-I2C1-false-HAL-true
 RCC.48CLKFreq_Value=24000000
 RCC.AHBFreq_Value=32000000
 RCC.APB1Freq_Value=32000000
