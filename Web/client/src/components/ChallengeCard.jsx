@@ -20,6 +20,7 @@ const ChallengeCard = () => {
 
   // Rerenders the challenge card
   const updateChallenge = (data) => {
+    fadeOutAndIn();
     setChallenge({
       mcu: data.currentChallenge.module,
       img: data.currentChallenge.img,
@@ -58,8 +59,6 @@ const ChallengeCard = () => {
     fetchChallenge();
     const eventSource = new EventSource("http://localhost:3003/api/subscribe");
     eventSource.onmessage = (e) => {
-      fadeOutAndIn();
-
       const eventData = JSON.parse(e.data);
       console.log(eventData);
       updateChallenge(eventData);
