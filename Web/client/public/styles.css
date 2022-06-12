@@ -22,6 +22,7 @@ h1 {
   height: 600px;
   width: 550px;
   background-color: #eeeeee;
+  border-radius: 5px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -38,6 +39,7 @@ h1 {
 
 .challenge-img {
   max-width: 70%;
+  border-radius: 7px;
 }
 
 .description {
@@ -51,6 +53,7 @@ h1 {
   height: 40px;
   width: 100%;
   background-color: lightgrey;
+  border-radius: 7px 7px 0 0;
   display: flex;
   justify-content: space-between;
 }

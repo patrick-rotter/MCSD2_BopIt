@@ -81,26 +81,38 @@ const ChallengeCard = () => {
         <AnimatePresence>
           {!isHidden && (
             <motion.div
-            className="challenge"
+              className="challenge"
               key={challenge.cmd}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <Title text={challenge.mcu} cmd={challenge.cmd} isAlive={isAlive} />
+              <Title
+                text={challenge.mcu}
+                cmd={challenge.cmd}
+                isAlive={isAlive}
+              />
               <Image url={challenge.img} />
               <Description text={challenge.description} />
               <p>{challenge.cmd}</p>
             </motion.div>
           )}
         </AnimatePresence>
-
       </div>
-      {!isAlive && (
-        <button className="reset-btn" onClick={resetGame}>
-          Play again?
-        </button>
-      )}
+
+      <AnimatePresence>
+        {!isAlive && (
+          <motion.button
+            initial={{ x: -1000 }}
+            animate={{ x: 0 }}
+            exit={{ x: 1000 }}
+            className="reset-btn"
+            onClick={resetGame}
+          >
+            Play again?
+          </motion.button>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
