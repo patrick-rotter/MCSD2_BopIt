@@ -45,6 +45,7 @@ const ChallengeCard = () => {
     setIsAlive(true);
   };
 
+  // Change isHidden state to fade challenge out and in again
   const fadeOutAndIn = () => {
     setIsHidden(true);
     setTimeout(() => {
@@ -73,19 +74,20 @@ const ChallengeCard = () => {
   }, []);
 
   return (
-    <div className="challenge">
+    <div className="container">
       <div className="card">
         <StatusBar points={score} health={health} />
 
         <AnimatePresence>
           {!isHidden && (
             <motion.div
+            className="challenge"
               key={challenge.cmd}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <Title text={challenge.mcu} cmd={challenge.cmd} />
+              <Title text={challenge.mcu} cmd={challenge.cmd} isAlive={isAlive} />
               <Image url={challenge.img} />
               <Description text={challenge.description} />
               <p>{challenge.cmd}</p>

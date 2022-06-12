@@ -11,6 +11,7 @@ h1 {
   font-size: 4rem;
 }
 
+.container,
 .challenge {
   display: flex;
   align-items: center;
@@ -28,79 +29,20 @@ h1 {
 }
 
 .title {
+  margin-bottom: 30px;
   font-weight: 700;
   font-size: 2rem;
   opacity: 1;
   transition: opacity 0.5s;
 }
 
-
-
-
-
-
-
-.fade-out {
-  -webkit-animation: fade-out 1s;
-  animation: fade-out 1s;
-}
-
-.fade-in {
-  -webkit-animation: fade-in 1s;
-  animation: fade-in 1s;
-}
-
-@-webkit-keyframes fade-out {
-  0% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes fade-out {
-  0% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-
-@-webkit-keyframes fade-in {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-@keyframes fade-in {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-
-
-
-
-
-
-
-
-
 .challenge-img {
   max-width: 70%;
-  max-height: 70%;
 }
 
 .description {
+  margin-top: 20px;
+  max-width: 70%;
   font-weight: 300;
   font-size: 1.8rem;
 }
@@ -137,6 +79,22 @@ h1 {
 }
 
 .reset-btn {
+  font-weight: 500;
+  cursor: pointer;
+  padding: 10px 16px 10px 16px;
   margin-top: 30px;
-  background-color: aquamarine;
+  background-color: #cc0000;
+  color: white;
+  border: none;
+  border-radius: 2px;
+  margin-right: 8px;
+  transition: opacity 0.15s;
+}
+
+.reset-btn:hover {
+  opacity: 0.8;
+}
+
+.reset-btn:active {
+  opacity: 0.5;
 }
