@@ -9,6 +9,7 @@ let previousNumber = challenges.length + 1;
 export const generateUniqueRandomNum = () => {
   let isPreviousNumber = true;
 
+  // TODO: Nicht Convention
   while (isPreviousNumber) {
     randomNumber = Math.floor(Math.random() * challenges.length);
     if (randomNumber !== previousNumber) {

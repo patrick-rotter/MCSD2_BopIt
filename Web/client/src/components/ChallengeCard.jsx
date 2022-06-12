@@ -3,6 +3,7 @@ import Title from "./Title";
 import Image from "./Image";
 import Description from "./Description";
 import StatusBar from "./StatusBar";
+import { motion, AnimatePresence } from "framer-motion";
 
 const ChallengeCard = () => {
   const [challenge, setChallenge] = useState({
@@ -11,9 +12,11 @@ const ChallengeCard = () => {
     description: "",
     cmd: "",
   });
+
   const [health, setHealth] = useState(3);
   const [score, setScore] = useState(0);
   const [isAlive, setIsAlive] = useState(true);
+  const [isHidden, setIsHidden] = useState(false);
 
   // Rerenders the challenge card
   const updateChallenge = (data) => {
@@ -25,6 +28,7 @@ const ChallengeCard = () => {
     });
   };
 
+  // TODO: Put in custom hook
   // Fetches a random challenge
   const fetchChallenge = () => {
     fetch("http://localhost:3003/api/challenges", {
@@ -41,11 +45,20 @@ const ChallengeCard = () => {
     setIsAlive(true);
   };
 
+  const fadeOutAndIn = () => {
+    setIsHidden(true);
+    setTimeout(() => {
+      setIsHidden(false);
+    }, 1500);
+  };
+
   // Subscribes to sse to update the challenge on a sent event
   useEffect(() => {
     fetchChallenge();
     const eventSource = new EventSource("http://localhost:3003/api/subscribe");
     eventSource.onmessage = (e) => {
+      fadeOutAndIn();
+
       const eventData = JSON.parse(e.data);
       console.log(eventData);
       updateChallenge(eventData);
@@ -60,13 +73,32 @@ const ChallengeCard = () => {
   }, []);
 
   return (
-    <div className="card">
-      <StatusBar points={score} health={health} />
-      <Title text={challenge.mcu} />
-      <Image url={challenge.img} />
-      <Description text={challenge.description} />
-      <p>{challenge.cmd}</p>
-      {!isAlive && <button onClick={resetGame}>Play again?</button>}
+    <div className="challenge">
+      <div className="card">
+        <StatusBar points={score} health={health} />
+
+        <AnimatePresence>
+          {!isHidden && (
+            <motion.div
+              key={challenge.cmd}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <Title text={challenge.mcu} cmd={challenge.cmd} />
+              <Image url={challenge.img} />
+              <Description text={challenge.description} />
+              <p>{challenge.cmd}</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+      </div>
+      {!isAlive && (
+        <button className="reset-btn" onClick={resetGame}>
+          Play again?
+        </button>
+      )}
     </div>
   );
 };

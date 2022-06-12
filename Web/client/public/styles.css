@@ -1,4 +1,5 @@
 body {
+  font-family: "Roboto", Arial;
   display: flex;
   justify-content: center;
 }
@@ -6,23 +7,93 @@ body {
 h1 {
   text-align: center;
   margin: 20px 0 50px 0;
-  font-family: "Roboto";
   font-weight: 700;
   font-size: 4rem;
+}
+
+.challenge {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
 }
 
 .card {
   height: 600px;
   width: 550px;
   background-color: #eeeeee;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
 }
 
 .title {
-  font-family: "Roboto";
   font-weight: 700;
   font-size: 2rem;
+  opacity: 1;
+  transition: opacity 0.5s;
 }
+
+
+
+
+
+
+
+.fade-out {
+  -webkit-animation: fade-out 1s;
+  animation: fade-out 1s;
+}
+
+.fade-in {
+  -webkit-animation: fade-in 1s;
+  animation: fade-in 1s;
+}
+
+@-webkit-keyframes fade-out {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-out {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@-webkit-keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+
+
+
+
+
+
+
+
 
 .challenge-img {
   max-width: 70%;
@@ -30,31 +101,42 @@ h1 {
 }
 
 .description {
-  font-family: "Roboto";
   font-weight: 300;
   font-size: 1.8rem;
 }
 
 .status-bar {
   height: 40px;
-  padding: 0 10px 0 10px;
+  width: 100%;
   background-color: lightgrey;
   display: flex;
   justify-content: space-between;
 }
 
+.pixel-heart-container {
+  display: flex;
+  margin-right: 4px;
+}
+
+.pixel-heart-container div {
+  width: 39px;
+}
+
+.pixel-heart-img {
+  height: 38px;
+  transition: height 0.2s;
+}
+
+.pixel-heart-img:hover {
+  height: 42px;
+}
+
 .score-el {
-  font-family: "Roboto", Arial;
   line-height: 40px;
+  margin-left: 6px;
 }
 
-footer {
-  position: absolute;
-  text-align: center;
-  bottom: 0px;
-  width: 30%;
+.reset-btn {
+  margin-top: 30px;
+  background-color: aquamarine;
 }
-
-
-
-
