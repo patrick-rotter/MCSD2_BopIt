@@ -3,11 +3,11 @@ import challenges, { gameOver } from "./public/challenges.js";
 import { generateUniqueRandomNum } from "./libs/util.js";
 
 const app = express();
-const port = 3003;
+const port = 80;
 // Subscribed client to server sent events
 let clientRes = null;
 let client = {
-  currentChallenge: null,
+  currentChallenge: 0,
   score: 0,
   health: 3,
   isAlive: true,
@@ -72,6 +72,8 @@ const sendNextChallenge = (isAlive) => {
 
 // Handle MCU POST request
 const handleMCUPost = (req, res) => {
+  console.log(req);
+  console.log(req.body);
   console.log(req.body.mcu);
   console.log(req.body.cmd);
 

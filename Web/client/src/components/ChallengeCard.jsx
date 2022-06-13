@@ -32,7 +32,7 @@ const ChallengeCard = () => {
   // TODO: Put in custom hook
   // Fetches a random challenge
   const fetchChallenge = () => {
-    fetch("http://localhost:3003/api/challenges", {
+    fetch("http://localhost:80/api/challenges", {
       method: "GET",
     })
       .then((res) => res.json())
@@ -57,7 +57,7 @@ const ChallengeCard = () => {
   // Subscribes to sse to update the challenge on a sent event
   useEffect(() => {
     fetchChallenge();
-    const eventSource = new EventSource("http://localhost:3003/api/subscribe");
+    const eventSource = new EventSource("http://localhost:80/api/subscribe");
     eventSource.onmessage = (e) => {
       const eventData = JSON.parse(e.data);
       console.log(eventData);

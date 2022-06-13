@@ -56,13 +56,13 @@ const challenges = [
     cmd: "32",
     module: TOUCH_CLICK,
     img: "https://i.ytimg.com/vi/ba2RsswFNpg/maxresdefault.jpg",
-    description: "Touch the upper touch button on the touchpad!",
+    description: "Touch the middle touch button on the touchpad!",
   },
   {
     cmd: "33",
     module: TOUCH_CLICK,
     img: "https://i.ytimg.com/vi/ba2RsswFNpg/maxresdefault.jpg",
-    description: "Slide your finger across the touchpad!",
+    description: "Touch the upper touch button on the touchpad!",
   },
 ];
 
