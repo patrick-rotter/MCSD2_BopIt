@@ -65,6 +65,8 @@ osMessageQueueId_t touch_event_queueHandle;
 const osMessageQueueAttr_t touch_event_queue_attributes = {
   .name = "touch_event_queue"
 };
+
+
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -363,41 +365,68 @@ void start_touch_sensor_task(void *argument)
 
 	if (HAL_OK == init_result)
 	{
-		HAL_UART_Transmit(&huart2, (uint8_t *) "CY8 init success\r\n", strlen("CY8 init success\r\n"), 1000);
+		HAL_UART_Transmit(&huart2, (uint8_t *) "CY8C201A0 initiated\r\n", strlen("CY8C201A0 initiated\r\n"), 1000);
 	}
 	else
 	{
-		HAL_UART_Transmit(&huart2, (uint8_t *) "CY8 init failure\r\n", strlen("CY8 init success\r\n"), 1000);
+		HAL_UART_Transmit(&huart2, (uint8_t *) "CY8C201A0 initiation failed\r\n", strlen("CY8C201A0 initiation failed\r\n"), 1000);
 	}
+
+	/* Used to register when a button has been released */
+	uint8_t top_button_prev = 0;
+	uint8_t bottom_button_prev = 0;
+	uint8_t mid_button_prev = 0;
 
 	/* Infinite loop */
 	for(;;) {
 
-
-		uint8_t device_id = 0;
-
-		if (CY8_get_device_ID(&hi2c1, &device_id) == HAL_OK) { // Should be 0xa0
-			sprintf((char *) id_msg, "Device id was found to be: 0x%x\r\n", device_id);
-			HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
-		} else {
-			HAL_UART_Transmit(&huart2, (uint8_t *) "i2c error\r\n", strlen("i2c error\r\n"), 1000);
-		}
-
-
 		uint8_t cs0_read = 0;
+		uint8_t cs1_read = 0;
 
-		if (CY8_read_capsense_0(&hi2c1, &cs0_read) == HAL_OK)
-		{
-		sprintf((char *) id_msg, "capsense 0 read result: 0x%x\r\n", cs0_read);
-		HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
-		}
-		else
+		if (CY8_read_capsense_0(&hi2c1, &cs0_read) != HAL_OK)
 		{
 			HAL_UART_Transmit(&huart2, (uint8_t *) "i2c error on cp 0 read\r\n", strlen("i2c error on cp 0 read\r\n"), 1000);
+			osDelay(1450);
+			continue;
+
+		}
+
+		if (CY8_read_capsense_1(&hi2c1, &cs1_read) != HAL_OK)
+		{
+			HAL_UART_Transmit(&huart2, (uint8_t *) "i2c error on cp 1 read\r\n", strlen("i2c error on cp 1 read\r\n"), 1000);
+			osDelay(1450);
+			continue;
+		}
+
+		uint8_t top_button_current = cs0_read & CY8C201A0_CAPSENSE_0_CONFIG_TOP;
+		uint8_t bottom_button_current = cs0_read & CY8C201A0_CAPSENSE_0_CONFIG_BOTTOM;
+
+		/* Rising edge */
+		if (top_button_current && !top_button_prev)
+		{
+			uint16_t touch_msg = CY8C201A0_CAPSENSE_0_CONFIG_TOP;
+			osMessageQueuePut(touch_event_queueHandle, &touch_msg, 0, osWaitForever);
+		}
+
+		if (bottom_button_current && !bottom_button_prev)
+		{
+			uint16_t touch_msg = CY8C201A0_CAPSENSE_0_CONFIG_BOTTOM;
+			osMessageQueuePut(touch_event_queueHandle, &touch_msg, 0, osWaitForever);
+		}
+
+		if (cs1_read && !mid_button_prev)
+		{
+			uint16_t touch_msg = CY8C201A0_CAPSENSE_1_CONFIG_ALL;
+			osMessageQueuePut(touch_event_queueHandle, &touch_msg, 0, osWaitForever);
 		}
 
 
-		osDelay(3500);
+		top_button_prev = top_button_current;
+		bottom_button_prev = bottom_button_current;
+		mid_button_prev = cs1_read;
+
+
+		osDelay(50);
 
 
 
@@ -438,7 +467,28 @@ void start_wifi_dispatcher_task(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    uint16_t message = 0;
+
+    if (osMessageQueueGet(touch_event_queueHandle, &message, 0, osWaitForever) == osOK)
+    {
+    	switch (message)
+    	{
+    	case CY8C201A0_CAPSENSE_0_CONFIG_TOP:
+    		HAL_UART_Transmit(&huart2, (uint8_t*) "Top button pressed\r\n", strlen("Top button pressed\r\n"), 1000);
+    		break;
+    	case CY8C201A0_CAPSENSE_0_CONFIG_BOTTOM:
+    		HAL_UART_Transmit(&huart2, (uint8_t*) "Bottom button pressed\r\n", strlen("Bottom button pressed\r\n"), 1000);
+    		break;
+    	case CY8C201A0_CAPSENSE_1_CONFIG_ALL:
+    		HAL_UART_Transmit(&huart2, (uint8_t*) "Mid button pressed\r\n", strlen("Mid button pressed\r\n"), 1000);
+    		break;
+    	default:
+    		HAL_UART_Transmit(&huart2, (uint8_t*) "Invalid queue message\r\n", strlen("Invalid queue message\r\n"), 1000);
+    		break;
+    	}
+    }
+
+
   }
   /* USER CODE END start_wifi_dispatcher_task */
 }
