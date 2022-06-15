@@ -23,6 +23,7 @@ void wifible_init(UART_HandleTypeDef *uart, osSemaphoreId_t cont) {
 	wifible_send_command("AT+CWMODE=1");
 }
 
+/*
 void wifible_module_power(wifible_t *ctx, uint8_t power_state) {
 	if (0 != power_state) {
 		HAL_GPIO_WritePin(ctx->en, ctx->enPin, GPIO_PIN_SET);
@@ -37,6 +38,7 @@ void wifible_module_power(wifible_t *ctx, uint8_t power_state) {
 	}
 	osDelay(2000);
 }
+*/
 
 HAL_StatusTypeDef wifible_generic_write(char *data_buf, uint32_t timeout) {
 	return HAL_UART_Transmit(WIFI_BLE_Int, (uint8_t*) data_buf,
@@ -64,6 +66,7 @@ HAL_StatusTypeDef wifible_send_command(char *command) {
 
 void wifible_process() {
 	osSemaphoreAcquire(contSem, HAL_MAX_DELAY);
+	//osDelay(5000);
 }
 
 void connectWifi(char *ssid, char *pw) {
@@ -74,14 +77,10 @@ void connectWifi(char *ssid, char *pw) {
 }
 
 void sendHttpPost(char *fqdn, char *path, int id, int value) {
-	char content[100] = { 0 };
 	char cmd[200] = { 0 };
-	sprintf(content, "\"{\"id\":\"%d\",\"value\":\"%d\"}\"", id, value);
 	sprintf(cmd,
-			"AT+HTTPCPOST=\"http://%s%s\",%d,1,\"content-type: application/json\"",
-			fqdn, path, strlen(content));
+			"AT+HTTPCLIENT=3,0,\"http://%s%s\",\"%s\",\"%s\",1,\"mcu=%d&cmd=%d\"",
+			fqdn, path, fqdn, path, id, value);
 	wifible_process();
 	wifible_send_command(cmd);
-	wifible_process();
-	wifible_send_command(content);
 }

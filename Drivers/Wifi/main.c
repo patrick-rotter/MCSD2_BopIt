@@ -436,17 +436,19 @@ void StartCmdTask(void *argument)
 {
   /* USER CODE BEGIN StartCmdTask */
 	HAL_UART_Receive_DMA(&huart1, (uint8_t*) buffer, 1);
-	char *version = "AT+GMR\r\n";
+	/*char *version = "AT+GMR\r\n";
 	size_t len = strlen(version);
 	HAL_UART_Transmit(&huart1, (uint8_t*) version, len,
 	HAL_MAX_DELAY);
-	osDelay(5000);
+	osDelay(5000);*/
 
 	wifible_init(&huart1, wifiContinueSemHandle);
-	connectWifi("A1 Dachgeschoss", "Parzer123!");
-	sendHttpPost("httpbin.org", "/post", 1, 2);
+	//connectWifi("A1 Dachgeschoss", "Parzer123!");
+	connectWifi("Javaliero", "florianparzer");
+	sendHttpPost("172.20.10.13", "/api/challanges", 1, 11);
 	/* Infinite loop */
 	for (;;) {
+		sendHttpPost("172.20.10.13", "/api/challanges", 1, 11);
 		osDelay(1);
 	}
   /* USER CODE END StartCmdTask */
