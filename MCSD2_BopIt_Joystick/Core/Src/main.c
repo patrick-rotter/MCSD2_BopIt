@@ -401,7 +401,7 @@ void StartDefaultTask(void *argument)
 	  					} else if (ret == HAL_BUSY) {
 	  						HAL_UART_Transmit(&huart2, (uint8_t *) "* ", strlen((char *) "* "), 1000);
 	  					}
-	  					osDelay(50);
+	  					osDelay(20);
 	  				}
 
 	  				sprintf((char *) id_msg, "Scanning done\r\n");
