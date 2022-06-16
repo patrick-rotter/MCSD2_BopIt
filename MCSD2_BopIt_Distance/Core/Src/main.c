@@ -372,15 +372,34 @@ void StartDefaultTask(void *argument)
 	uint8_t msg[50];
 	for(;;) {
 		Si1153_hello_world((uint8_t *) "Files found\r\n");
-		osDelay(4000);
-		uint8_t part_id = Si1153_get_part_id(hi2c1);
+
+		uint8_t part_id = 0;
+		Si1153_get_part_id(&hi2c1, &part_id);
 		sprintf((char *) msg, "Part id: %x\r\n", part_id);
 		HAL_UART_Transmit(&huart2, msg, strlen((char *) msg), 1000);
 
-		uint8_t id_msg[50] = {0};
+		if (Si1153_set_param(&hi2c1, SI1153_CHAN_LIST_PARAM_ADDR, SI1153_CHAN_LIST_DEFAULT) != HAL_OK)
+		{
+			HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting channel list\r\n", strlen("Error setting channel list\r\n"), 1000);
+		}
+		else
+		{
+			HAL_UART_Transmit(&huart2, (uint8_t *) "Channel list set\r\n", strlen("Channel list set\r\n"), 1000);
+		}
 
-		uint8_t ret;
-				sprintf((char *) id_msg, "Scanning i2c\r\n");
+		uint8_t chanlist_retval = 0;
+		if (Si1153_query_param(&hi2c1, SI1153_CHAN_LIST_PARAM_ADDR, &chanlist_retval) != HAL_OK)
+		{
+			HAL_UART_Transmit(&huart2, (uint8_t *) "Error querying channel list\r\n", strlen("Error querying channel list\r\n"), 1000);
+		}
+		else
+		{
+			sprintf((char *) msg, "Queried channel list: %x\r\n", chanlist_retval);
+			HAL_UART_Transmit(&huart2, msg, strlen((char *) msg), 1000);
+
+		}
+
+/*				sprintf((char *) id_msg, "Scanning i2c\r\n");
 				HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
 
 				for (int i = 1; i < 128; i++) {
@@ -397,7 +416,10 @@ void StartDefaultTask(void *argument)
 				}
 
 				sprintf((char *) id_msg, "Scanning done\r\n");
-				HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
+				HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);*/
+
+
+				osDelay(4000);
 	}
   /* USER CODE END 5 */
 }

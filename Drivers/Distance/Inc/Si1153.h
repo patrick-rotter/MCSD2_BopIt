@@ -68,7 +68,7 @@
 
 #define SI1153_PARAM_ADDR_AUTO_INCREMENT_OFF (1 << 6)
 
-/* SI1153 channel settings */
+/* SI1153 default channel settings */
 
 /* Use a 1024 clock cycle (48.8µs minimum) measurement time and the small infrared photodiode */
 #define SI1153_ADCCONFIG_DEFAULT (0x00)
@@ -81,12 +81,31 @@
 /* Use measurement counter 0 (meaning it is mandatory to set it up), LEDs disabled. */
 #define SI1153_MEASCONFIG_DEFAULT (0x40)
 
+/* SI1153 default global settings */
+#define SI1153_CHAN_LIST_DEFAULT (0x01)
+#define SI1153_MEASRATE_H_DEFAULT (0x00)
+#define SI1153_MEASRATE_L_DEFAULT (0x02)
+/* All channels using MEASCOUNT0 will have a measurement period of 4ms */
+#define SI1153_MEASCOUNT0_DEFAULT (0x05)
+
+/* SI1153 RESPONSE0 register format masks */
+
+#define SI1153_RESPONSE_RUNNING_MASK (1 << 7)
+#define SI1153_RESPONSE_SUSPEND_MASK (1 << 6)
+#define SI1153_RESPONSE_SLEEP_MASK (1 << 5)
+#define SI1153_RESPONSE_ERROR_MASK (1 << 4)
+#define SI1153_RESPONSE_COMMAND_COUNTER_MASK (0x0f)
+
 extern UART_HandleTypeDef huart2;
 
 void Si1153_hello_world(uint8_t *echo);
 
+HAL_StatusTypeDef Si1153_generic_read_single(I2C_HandleTypeDef *hi2c, uint8_t device_register, uint8_t *data);
+HAL_StatusTypeDef Si1153_generic_write_single(I2C_HandleTypeDef *hi2c, uint8_t device_register, uint8_t data);
 
+HAL_StatusTypeDef Si1153_get_part_id(I2C_HandleTypeDef *hi2c, uint8_t *read_result);
 
-uint8_t Si1153_get_part_id(I2C_HandleTypeDef hi2c);
+HAL_StatusTypeDef Si1153_query_param(I2C_HandleTypeDef *hi2c, uint8_t parameter, uint8_t *read_result);
+HAL_StatusTypeDef Si1153_set_param(I2C_HandleTypeDef *hi2c, uint8_t parameter, uint8_t parameter_value);
 
 #endif
