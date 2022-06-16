@@ -19,19 +19,20 @@
 /* SI1153 I²C registers */
 
 #define SI1153_PART_ID_REG (0x00)
+/* Configuration parameters are to be written into this register before calling "PARAM_SET". If successful,
+ * the contents of this register will be copied into "RESPONSE1" after the command has been executed. */
 #define SI1153_HOSTIN0_REG (0x0a)
 #define SI1153_COMMAND_REG (0x0b)
 #define SI1153_IRQ_ENABLE_REG (0x0f)
 #define SI1153_RESPONSE1_REG (0x10)
 #define SI1153_RESPONSE0_REG (0x11)
 #define SI1153_IRQ_STATUS_REG (0x12)
+/* The registers below contain captured sensor data after a measurement */
 #define SI1153_HOSTOUT0_REG (0x13)
 #define SI1153_HOSTOUT1_REG (0x14)
 #define SI1153_HOSTOUT2_REG (0x15)
 #define SI1153_HOSTOUT3_REG (0x16)
 #define SI1153_HOSTOUT4_REG (0x17)
-
-
 
 /* SI1153 commands */
 
@@ -45,12 +46,46 @@
 #define SI1153_PARAM_QUERY_COMMAND_PREFIX (0x40)
 #define SI1153_PARAM_SET_COMMAND_PREFIX (0x80)
 
+/* SI1153 internal parameter table */
+
+#define SI1153_I2C_ADDR_PARAM_ADDR (0x00)
+#define SI1153_CHAN_LIST_PARAM_ADDR (0x01)
+/* Channel 0 configuration */
+#define SI1153_ADCCONFIG0_PARAM_ADDR (0x02)
+#define SI1153_ADCSENS0_PARAM_ADDR (0x03)
+#define SI1153_ADCPOST0_PARAM_ADDR (0x04)
+#define SI1153_MEASCONFIG0_PARAM_ADDR (0x05)
+/* Global configuration */
+#define SI1153_MEASRATE_H_PARAM_ADDR (0x1a)
+#define SI1153_MEASRATE_L_PARAM_ADDR (0x1b)
+#define SI1153_MEASCOUNT0_PARAM_ADDR (0x1c)
+#define SI1153_MEASCOUNT1_PARAM_ADDR (0x1d)
+#define SI1153_MEASCOUNT2_PARAM_ADDR (0x1e)
+#define SI1153_THRESHOLD0_H_PARAM_ADDR (0x25)
+#define SI1153_THRESHOLD0_L_PARAM_ADDR (0x26)
+#define SI1153_THRESHOLD1_H_PARAM_ADDR (0x27)
+#define SI1153_THRESHOLD1_L_PARAM_ADDR (0x28)
 
 #define SI1153_PARAM_ADDR_AUTO_INCREMENT_OFF (1 << 6)
+
+/* SI1153 channel settings */
+
+/* Use a 1024 clock cycle (48.8µs minimum) measurement time and the small infrared photodiode */
+#define SI1153_ADCCONFIG_DEFAULT (0x00)
+/* Low range, no measurement accumulation. The four LSBs determine the measurement time multiplier
+ * (with the multiplication base being 48.8µs, as specified in the default ADCCONFIG). This gives
+ * us a measurement time of around 48.8µs * 2 ≈ 0.1ms */
+#define SI1153_ADCSENS_DEFAULT (0x02)
+/* 16 bit measurements, with no accumulation shift. Interrupt thresholds deactivated. */
+#define SI1153_ADCPOST_DEFAULT (0x00)
+/* Use measurement counter 0 (meaning it is mandatory to set it up), LEDs disabled. */
+#define SI1153_MEASCONFIG_DEFAULT (0x40)
 
 extern UART_HandleTypeDef huart2;
 
 void Si1153_hello_world(uint8_t *echo);
+
+
 
 uint8_t Si1153_get_part_id(I2C_HandleTypeDef hi2c);
 
