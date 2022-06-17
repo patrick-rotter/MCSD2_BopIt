@@ -102,9 +102,9 @@ const ChallengeCard = () => {
       <AnimatePresence>
         {!isAlive && (
           <motion.button
-            initial={{ x: -1000 }}
-            animate={{ x: 0 }}
-            exit={{ x: 1000 }}
+            initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
             className="reset-btn"
             onClick={resetGame}
           >
