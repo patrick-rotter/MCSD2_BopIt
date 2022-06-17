@@ -4,10 +4,6 @@
 
 #define SI1153_COMMAND_MAX_RETRIES 25
 
-void Si1153_hello_world(uint8_t *echo) {
-	HAL_UART_Transmit(&huart2, echo, strlen((char *) echo), 1000);
-}
-
 HAL_StatusTypeDef Si1153_generic_read_single(I2C_HandleTypeDef *hi2c, uint8_t device_register, uint8_t *data) {
 	if ((NULL == hi2c) || (NULL == data))
 	{
@@ -67,7 +63,7 @@ HAL_StatusTypeDef Si1153_query_param(I2C_HandleTypeDef *hi2c, uint8_t parameter,
 		if ((command_counter_after & SI1153_RESPONSE_ERROR_MASK) || i2c_error_counter)
 		{
 			/* An I²C or command execution error has occurred */
-			/* TODO: Attempt to reset command counter */
+			Si1153_reset_command_counter(hi2c);
 			return HAL_ERROR;
 		}
 
@@ -111,7 +107,7 @@ HAL_StatusTypeDef Si1153_set_param(I2C_HandleTypeDef *hi2c, uint8_t parameter, u
 		if ((command_counter_after & SI1153_RESPONSE_ERROR_MASK) || i2c_error_counter)
 		{
 			/* An I²C or command execution error has occurred */
-			/* TODO: Attempt to reset command counter */
+			Si1153_reset_command_counter(hi2c);
 			return HAL_ERROR;
 		}
 
@@ -124,4 +120,38 @@ HAL_StatusTypeDef Si1153_set_param(I2C_HandleTypeDef *hi2c, uint8_t parameter, u
 
 
 	return HAL_ERROR;
+}
+
+HAL_StatusTypeDef Si1153_reset_command_counter(I2C_HandleTypeDef *hi2c) {
+	if (NULL == hi2c)
+	{
+		return HAL_ERROR;
+	}
+
+	for (int i = 0; i < SI1153_COMMAND_MAX_RETRIES; i++)
+	{
+		HAL_StatusTypeDef i2c_error_counter = 0;
+
+		/* Send counter reset command */
+		i2c_error_counter += Si1153_generic_write_single(hi2c, SI1153_COMMAND_REG, SI1153_RST_CMD_CTR_COMMAND);
+
+		/* Check the state of the command counter */
+		uint8_t command_counter_after = 0;
+		i2c_error_counter += Si1153_generic_read_single(hi2c, SI1153_RESPONSE0_REG, &command_counter_after);
+
+		if ((command_counter_after & SI1153_RESPONSE_ERROR_MASK) || i2c_error_counter)
+		{
+			/* An I²C or command execution error has occurred */
+			return HAL_ERROR;
+		}
+
+		if (0 == (command_counter_after & SI1153_RESPONSE_COMMAND_COUNTER_MASK))
+		{
+			/* The command counter has incremented, stop looping */
+			return HAL_OK;
+		}
+	}
+
+
+		return HAL_ERROR;
 }

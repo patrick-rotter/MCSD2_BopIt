@@ -371,7 +371,6 @@ void StartDefaultTask(void *argument)
 	/* Infinite loop */
 	uint8_t msg[50];
 	for(;;) {
-		Si1153_hello_world((uint8_t *) "Files found\r\n");
 
 		uint8_t part_id = 0;
 		Si1153_get_part_id(&hi2c1, &part_id);
@@ -396,30 +395,10 @@ void StartDefaultTask(void *argument)
 		{
 			sprintf((char *) msg, "Queried channel list: %x\r\n", chanlist_retval);
 			HAL_UART_Transmit(&huart2, msg, strlen((char *) msg), 1000);
-
 		}
 
-/*				sprintf((char *) id_msg, "Scanning i2c\r\n");
-				HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
 
-				for (int i = 1; i < 128; i++) {
-					ret = HAL_I2C_IsDeviceReady(&hi2c1, i << 1, 3, 10);
-					if (ret == HAL_OK) {
-						sprintf((char *) id_msg, "Device found at: 0x%x\r\n", i);
-						HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
-					} else if (ret == HAL_ERROR) {
-						HAL_UART_Transmit(&huart2, (uint8_t *) "- ", strlen((char *) "- "), 1000);
-					} else if (ret == HAL_BUSY) {
-						HAL_UART_Transmit(&huart2, (uint8_t *) "* ", strlen((char *) "* "), 1000);
-					}
-					osDelay(50);
-				}
-
-				sprintf((char *) id_msg, "Scanning done\r\n");
-				HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);*/
-
-
-				osDelay(4000);
+		osDelay(4000);
 	}
   /* USER CODE END 5 */
 }

@@ -82,6 +82,7 @@
 #define SI1153_MEASCONFIG_DEFAULT (0x40)
 
 /* SI1153 default global settings */
+
 #define SI1153_CHAN_LIST_DEFAULT (0x01)
 #define SI1153_MEASRATE_H_DEFAULT (0x00)
 #define SI1153_MEASRATE_L_DEFAULT (0x02)
@@ -98,14 +99,43 @@
 
 extern UART_HandleTypeDef huart2;
 
-void Si1153_hello_world(uint8_t *echo);
-
 HAL_StatusTypeDef Si1153_generic_read_single(I2C_HandleTypeDef *hi2c, uint8_t device_register, uint8_t *data);
 HAL_StatusTypeDef Si1153_generic_write_single(I2C_HandleTypeDef *hi2c, uint8_t device_register, uint8_t data);
 
 HAL_StatusTypeDef Si1153_get_part_id(I2C_HandleTypeDef *hi2c, uint8_t *read_result);
 
+/**
+ * @brief Query a value from the sensor's internal parameter table. Internally, this is done by
+ * sending a command consisting of the SI1153_PARAM_QUERY_COMMAND_PREFIX and a 6-bit address
+ * pointing to a location in the parameter table.
+ *
+ * @param read_result If successful, the value of the queried parameter will be written into this
+ * address. If not, no write will occur.
+ *
+ * @retval Returns HAL_OK on success. If HAL_ERROR has been returned, it can mean one of several
+ * things. Either there was an I2C connection error, the command could not be executed by the
+ * sensor, or too many command execution attempts were necessary.
+ */
 HAL_StatusTypeDef Si1153_query_param(I2C_HandleTypeDef *hi2c, uint8_t parameter, uint8_t *read_result);
+
+/**
+ * @brief Set a value to the sensor's internal parameter table. Internally, this is done by
+ * sending a command consisting of the SI1153_PARAM_SET_COMMAND_PREFIX and a 6-bit address
+ * pointing to a location in the parameter table.
+ *
+ * @param parameter_value If successful, this value will be written into the corresponding
+ * location in the parameter table. If not, no write will occur.
+ *
+ * @retval Returns HAL_OK on success. If HAL_ERROR has been returned, it can mean one of several
+ * things. Either there was an I2C connection error, the command could not be executed by the
+ * sensor, or too many command execution attempts were necessary.
+ */
 HAL_StatusTypeDef Si1153_set_param(I2C_HandleTypeDef *hi2c, uint8_t parameter, uint8_t parameter_value);
+
+/**
+ * @brief Resets the Si1153's internal command counter to 0. The command counter consists of 4
+ * bits and increments on every successful command execution.
+ */
+HAL_StatusTypeDef Si1153_reset_command_counter(I2C_HandleTypeDef *hi2c);
 
 #endif
