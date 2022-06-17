@@ -51,7 +51,7 @@ const ChallengeCard = () => {
     setIsHidden(true);
     setTimeout(() => {
       setIsHidden(false);
-    }, 1500);
+    }, 1000);
   };
 
   // Subscribes to sse to update the challenge on a sent event

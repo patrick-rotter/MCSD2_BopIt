@@ -1,13 +1,21 @@
-
 @font-face {
   font-family: "Seven Segment";
-  src: url("sevensegment.ttf") format("truetype")
+  src: url("sevensegment.ttf") format("truetype");
 }
 
 @import url(https://fonts.googleapis.com/css?family=Exo+2:200i);
 
+* {
+  margin: 0;
+  padding: 0;
+}
+
 body {
+  background-image: url("./background.jpg");
+  background-size: cover;
+  background-attachment: fixed;
   font-family: "Roboto", Arial;
+  color: white;
   display: flex;
   justify-content: center;
 }
@@ -27,9 +35,10 @@ body {
 }
 
 .card {
-  height: 600px;
-  width: 550px;
-  background-color: #eeeeee;
+  background: rgba(255, 255, 255, .4);
+  box-shadow: 0 15px 20px rgba(0, 0, 0, .2);
+  height: 550px;
+  width: 500px;
   border-radius: 5px;
   display: flex;
   flex-direction: column;
@@ -38,7 +47,7 @@ body {
 }
 
 .title {
-  margin-bottom: 30px;
+  margin: 30px 0 30px 0;
   font-weight: 700;
   font-size: 1.8rem;
   opacity: 1;
@@ -58,9 +67,9 @@ body {
 }
 
 .status-bar {
+  background: rgba(255, 255, 255, .4);
   height: 40px;
   width: 100%;
-  background-color: lightgrey;
   border-radius: 7px 7px 0 0;
   display: flex;
   justify-content: space-between;
@@ -85,6 +94,7 @@ body {
 }
 
 .score-el {
+  color: black;
   line-height: 40px;
   margin-left: 6px;
 }
