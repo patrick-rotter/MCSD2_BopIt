@@ -35,6 +35,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define measure_event_flag 1
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -56,6 +57,11 @@ const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
   .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for measureEvent */
+osEventFlagsId_t measureEventHandle;
+const osEventFlagsAttr_t measureEvent_attributes = {
+  .name = "measureEvent"
 };
 /* USER CODE BEGIN PV */
 #define Si1153_ADC_LUT_len 17
@@ -79,7 +85,11 @@ static const float Si1153_ADC_LUT[Si1153_ADC_LUT_len] = {
 										494.8
 										};
 
+/**
+ * @brief Used in conjunction with TIM6 to debounce the button after an interrupt
+ */
 uint8_t button_ready = 1;
+
 
 /* USER CODE END PV */
 
@@ -163,6 +173,10 @@ int main(void)
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
+
+  /* Create the event(s) */
+  /* creation of measureEvent */
+  measureEventHandle = osEventFlagsNew(&measureEvent_attributes);
 
   /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */
@@ -462,9 +476,14 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   UNUSED(GPIO_Pin);
   if (button_ready)
   {
+
 	  HAL_UART_Transmit(&huart2, (uint8_t *) "Interrupt!\r\n", strlen("Interrupt!\r\n"), 500);
-	  HAL_TIM_Base_Start_IT(&htim6);
+	  osEventFlagsSet(measureEventHandle, measure_event_flag);
+
 	  button_ready = 0;
+
+	  /* Disable the button until debounced, as reported by TIM6 */
+	  HAL_TIM_Base_Start_IT(&htim6);
   }
 
 }
@@ -558,7 +577,7 @@ void StartDefaultTask(void *argument)
 
 	for(;;) {
 
-
+		osEventFlagsWait(measureEventHandle, measure_event_flag, 0, osWaitForever);
 
 		uint16_t chan_0 = 0;
 		if (Si1153_read_channel_0_16bit(&hi2c1, &chan_0) != HAL_OK)
@@ -567,11 +586,11 @@ void StartDefaultTask(void *argument)
 		}
 		else
 		{
+			/* Interfacing with the WiFi module goes here */
 			sprintf((char *) msg, "%05d - % 2d cm\r\n", chan_0, Si1153_ADC_to_cm(chan_0));
 			HAL_UART_Transmit(&huart2, msg, strlen((char *) msg), 1000);
 		}
 
-		osDelay(1750);
 	}
   /* USER CODE END 5 */
 }
