@@ -64,13 +64,8 @@ const osThreadAttr_t printTask_attributes = {
 osThreadId_t commandTaskHandle;
 const osThreadAttr_t commandTask_attributes = {
   .name = "commandTask",
-  .stack_size = 128 * 4,
+  .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityLow,
-};
-/* Definitions for receiveQueue */
-osMessageQueueId_t receiveQueueHandle;
-const osMessageQueueAttr_t receiveQueue_attributes = {
-  .name = "receiveQueue"
 };
 /* Definitions for wifiContinueSem */
 osSemaphoreId_t wifiContinueSemHandle;
@@ -153,10 +148,6 @@ int main(void)
   /* USER CODE BEGIN RTOS_TIMERS */
 	/* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
-
-  /* Create the queue(s) */
-  /* creation of receiveQueue */
-  receiveQueueHandle = osMessageQueueNew (200, sizeof(uint8_t), &receiveQueue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
 	/* add queues, ... */
@@ -385,10 +376,7 @@ int _write(int file, char *ptr, int len) {
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-	if (huart == &huart1) {
-		osMessageQueuePut(receiveQueueHandle, buffer, 0, HAL_MAX_DELAY);
-		HAL_UART_Receive_DMA(&huart1, (uint8_t*) buffer, 1);
-	}
+
 }
 
 /* USER CODE END 4 */
@@ -403,23 +391,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 void StartPrintTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
-	char ch = 0;
-	char recBuf[5] = { 0 };
-	char *tmp;
 	/* Infinite loop */
 	for (;;) {
-		osMessageQueueGet(receiveQueueHandle, &ch, 0, HAL_MAX_DELAY);
-		printf("%c", ch);
-		for (int i = 0; i < 4; i++) {
-			recBuf[i] = recBuf[i + 1];
-		}
-		recBuf[5] = ch;
-		tmp = recBuf + 3;
-		if (strcmp(tmp, "of") == 0) {
-			osSemaphoreRelease(wifiContinueSemHandle);
-		} else if (strcmp(recBuf, "error") == 0) {
-			osSemaphoreRelease(wifiContinueSemHandle);
-		}
 		osDelay(1);
 	}
   /* USER CODE END 5 */
@@ -435,16 +408,10 @@ void StartPrintTask(void *argument)
 void StartCmdTask(void *argument)
 {
   /* USER CODE BEGIN StartCmdTask */
-	HAL_UART_Receive_DMA(&huart1, (uint8_t*) buffer, 1);
-	/*char *version = "AT+GMR\r\n";
-	size_t len = strlen(version);
-	HAL_UART_Transmit(&huart1, (uint8_t*) version, len,
-	HAL_MAX_DELAY);
-	osDelay(5000);*/
-
+	printf("Projekt\r\n");
 	wifible_init(&huart1, wifiContinueSemHandle);
-	//connectWifi("A1 Dachgeschoss", "Parzer123!");
-	connectWifi("Javaliero", "florianparzer");
+	connectWifi("A1 Dachgeschoss", "Parzer123!");
+	//connectWifi("Javaliero", "florianparzer");
 	sendHttpPost("172.20.10.13", "/api/challanges", 1, 11);
 	/* Infinite loop */
 	for (;;) {

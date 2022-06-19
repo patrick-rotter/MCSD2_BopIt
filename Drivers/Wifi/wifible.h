@@ -10,26 +10,16 @@
 
 #include "cmsis_os.h"
 #include "main.h"
+#include "stdbool.h"
+
+#define BUFF_Size       128  /* must be power of two */
 
 UART_HandleTypeDef *WIFI_BLE_Int;
-osSemaphoreId_t contSem;
+static uint8_t circ_buffer[BUFF_Size];
+static uint32_t rd_ptr;
 
-/**
- * @brief Click ctx object definition.
- */
-typedef struct {
-	// Output pins
+#define DMA_WRITE_PTR ( (BUFF_Size - WIFI_BLE_Int->hdmarx->Instance->CNDTR) & (BUFF_Size - 1) )
 
-	GPIO_TypeDef *rst;
-	uint16_t rstPin;
-	GPIO_TypeDef *en;
-	uint16_t enPin;
-
-	// Modules
-
-	UART_HandleTypeDef *uart;
-
-} wifible_t;
 
 /**
  * @brief Error type
@@ -46,14 +36,6 @@ typedef uint8_t wifible_error_t;
 void wifible_init(UART_HandleTypeDef *uart, osSemaphoreId_t cont);
 
 /**
- * @brief Power module.
- *
- * @param ctx           Click object.
- * @param power_state   State of pin.
- */
-void wifible_module_power(wifible_t *ctx, uint8_t power_state);
-
-/**
  * @brief Generic write function.
  * @param wifible Click object.
  * @param data_buf Data buffer for sends.
@@ -61,15 +43,6 @@ void wifible_module_power(wifible_t *ctx, uint8_t power_state);
  */
 HAL_StatusTypeDef wifible_generic_write(char *data_buf, uint32_t timeout);
 
-/**
- * @brief Generic read function.
- * @param wifible Click object.
- * @param data_buf Data buffer for read data.
- * @param max_len The maximum length of data that can be read.
- * @return Number of reads data.
- */
-HAL_StatusTypeDef wifible_generic_read(wifible_t *ctx, char *data_buf,
-		uint32_t timeout);
 
 /**
  * @brief Function for send command.
@@ -89,5 +62,11 @@ void connectWifi(char *ssid, char *pw);
 void wifible_process();
 
 void sendHttpPost(char *fqdn, char *path, int id, int value);
+
+void msgrx_init(UART_HandleTypeDef *huart);
+
+static bool msgrxIsEmpty(void);
+
+static uint8_t msgrxGet(void);
 
 #endif /* INC_WIFIBLE_H_ */
