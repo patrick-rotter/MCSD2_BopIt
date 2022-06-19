@@ -138,4 +138,8 @@ HAL_StatusTypeDef Si1153_set_param(I2C_HandleTypeDef *hi2c, uint8_t parameter, u
  */
 HAL_StatusTypeDef Si1153_reset_command_counter(I2C_HandleTypeDef *hi2c);
 
+HAL_StatusTypeDef Si1153_start_autonomous_mode(I2C_HandleTypeDef *hi2c);
+
+HAL_StatusTypeDef Si1153_read_channel_0_16bit(I2C_HandleTypeDef *hi2c, uint16_t *channel_value);
+
 #endif

@@ -153,5 +153,72 @@ HAL_StatusTypeDef Si1153_reset_command_counter(I2C_HandleTypeDef *hi2c) {
 	}
 
 
+	return HAL_ERROR;
+}
+
+HAL_StatusTypeDef Si1153_start_autonomous_mode(I2C_HandleTypeDef *hi2c) {
+	if (NULL == hi2c)
+	{
 		return HAL_ERROR;
+	}
+
+	for (int i = 0; i < SI1153_COMMAND_MAX_RETRIES; i++)
+	{
+		HAL_StatusTypeDef i2c_error_counter = 0;
+
+		/* Check the initial state of the command counter */
+		uint8_t command_counter_before = 0;
+		i2c_error_counter += Si1153_generic_read_single(hi2c, SI1153_RESPONSE0_REG, &command_counter_before);
+
+		/* Send start command */
+		i2c_error_counter += Si1153_generic_write_single(hi2c, SI1153_COMMAND_REG, SI1153_START_MEASUREMENTS_COMMAND);
+
+		/* Check the state of the command counter again*/
+		uint8_t command_counter_after = 0;
+		i2c_error_counter += Si1153_generic_read_single(hi2c, SI1153_RESPONSE0_REG, &command_counter_after);
+
+		if ((command_counter_after & SI1153_RESPONSE_ERROR_MASK) || i2c_error_counter)
+		{
+			/* An I²C or command execution error has occurred */
+			Si1153_reset_command_counter(hi2c);
+			return HAL_ERROR;
+		}
+
+		if ((command_counter_after & SI1153_RESPONSE_COMMAND_COUNTER_MASK) > (command_counter_before & SI1153_RESPONSE_COMMAND_COUNTER_MASK))
+		{
+			/* The command counter has incremented, stop looping */
+			return HAL_OK;
+		}
+	}
+
+	return HAL_ERROR;
+
+}
+
+HAL_StatusTypeDef Si1153_read_channel_0_16bit(I2C_HandleTypeDef *hi2c, uint16_t *channel_value) {
+	if ((NULL == hi2c) || (NULL == channel_value))
+	{
+		return HAL_ERROR;
+	}
+
+	uint8_t channel_0_high = 0;
+	uint8_t channel_0_low = 0;
+
+	HAL_StatusTypeDef read_result = Si1153_generic_read_single(hi2c, SI1153_HOSTOUT0_REG, &channel_0_high);
+
+	if (HAL_OK != read_result)
+	{
+		return read_result;
+	}
+
+	read_result = Si1153_generic_read_single(hi2c, SI1153_HOSTOUT1_REG, &channel_0_low);
+
+	if (HAL_OK != read_result)
+	{
+		return read_result;
+	}
+
+	*channel_value = (channel_0_high << 8) + channel_0_low;
+
+	return HAL_OK;
 }
