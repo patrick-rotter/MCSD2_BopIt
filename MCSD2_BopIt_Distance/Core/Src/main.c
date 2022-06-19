@@ -45,6 +45,8 @@
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
 
+TIM_HandleTypeDef htim6;
+
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 
@@ -77,6 +79,8 @@ static const float Si1153_ADC_LUT[Si1153_ADC_LUT_len] = {
 										494.8
 										};
 
+uint8_t button_ready = 1;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -85,6 +89,7 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_USART1_UART_Init(void);
+static void MX_TIM6_Init(void);
 void StartDefaultTask(void *argument);
 
 /* USER CODE BEGIN PFP */
@@ -127,6 +132,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_I2C1_Init();
   MX_USART1_UART_Init();
+  MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -280,6 +286,44 @@ static void MX_I2C1_Init(void)
 }
 
 /**
+  * @brief TIM6 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM6_Init(void)
+{
+
+  /* USER CODE BEGIN TIM6_Init 0 */
+
+  /* USER CODE END TIM6_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM6_Init 1 */
+
+  /* USER CODE END TIM6_Init 1 */
+  htim6.Instance = TIM6;
+  htim6.Init.Prescaler = 32000;
+  htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim6.Init.Period = 999;
+  htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim6, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM6_Init 2 */
+
+  /* USER CODE END TIM6_Init 2 */
+
+}
+
+/**
   * @brief USART1 Initialization Function
   * @param None
   * @retval None
@@ -366,12 +410,22 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
 
+  /*Configure GPIO pin : SHIELD_BUTTON_Pin */
+  GPIO_InitStruct.Pin = SHIELD_BUTTON_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(SHIELD_BUTTON_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pin : LD3_Pin */
   GPIO_InitStruct.Pin = LD3_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LD3_GPIO_Port, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI3_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
 
 }
 
@@ -401,6 +455,20 @@ uint8_t Si1153_ADC_to_cm(uint16_t ADC_value) {
 
 	return smallest_diff_i;
 }
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  /* Prevent unused argument(s) compilation warning */
+  UNUSED(GPIO_Pin);
+  if (button_ready)
+  {
+	  HAL_UART_Transmit(&huart2, (uint8_t *) "Interrupt!\r\n", strlen("Interrupt!\r\n"), 500);
+	  HAL_TIM_Base_Start_IT(&htim6);
+	  button_ready = 0;
+  }
+
+}
+
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -415,81 +483,77 @@ void StartDefaultTask(void *argument)
   /* USER CODE BEGIN 5 */
 	uint8_t msg[50];
 
-			if (Si1153_set_param(&hi2c1, SI1153_CHAN_LIST_PARAM_ADDR, SI1153_CHAN_LIST_DEFAULT) != HAL_OK)
-			{
-				HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting channel list\r\n", strlen("Error setting channel list\r\n"), 1000);
-			}
-			else
-			{
-				HAL_UART_Transmit(&huart2, (uint8_t *) "Channel list set\r\n", strlen("Channel list set\r\n"), 1000);
-			}
+	if (Si1153_set_param(&hi2c1, SI1153_CHAN_LIST_PARAM_ADDR, SI1153_CHAN_LIST_DEFAULT) != HAL_OK)
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting channel list\r\n", strlen("Error setting channel list\r\n"), 1000);
+	}
+	else
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Channel list set\r\n", strlen("Channel list set\r\n"), 1000);
+	}
 
-			if (Si1153_set_param(&hi2c1, SI1153_MEASRATE_L_PARAM_ADDR, SI1153_MEASRATE_L_DEFAULT) != HAL_OK)
-			{
-				HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting measure rate l\r\n", strlen("Error setting measure rate l\r\n"), 1000);
-			}
-			else
-			{
-				HAL_UART_Transmit(&huart2, (uint8_t *) "Measure rate l set\r\n", strlen("Measure rate l set\r\n"), 1000);
-			}
+	if (Si1153_set_param(&hi2c1, SI1153_MEASRATE_L_PARAM_ADDR, SI1153_MEASRATE_L_DEFAULT) != HAL_OK)
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting measure rate l\r\n", strlen("Error setting measure rate l\r\n"), 1000);
+	}
+	else
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Measure rate l set\r\n", strlen("Measure rate l set\r\n"), 1000);
+	}
 
-			if (Si1153_set_param(&hi2c1, SI1153_MEASCOUNT0_PARAM_ADDR, SI1153_MEASCOUNT0_DEFAULT) != HAL_OK)
-			{
-				HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting measure count\r\n", strlen("Error setting measure count\r\n"), 1000);
-			}
-			else
-			{
-				HAL_UART_Transmit(&huart2, (uint8_t *) "Measure count set\r\n", strlen("Measure count set\r\n"), 1000);
-			}
+	if (Si1153_set_param(&hi2c1, SI1153_MEASCOUNT0_PARAM_ADDR, SI1153_MEASCOUNT0_DEFAULT) != HAL_OK)
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting measure count\r\n", strlen("Error setting measure count\r\n"), 1000);
+	}
+	else
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Measure count set\r\n", strlen("Measure count set\r\n"), 1000);
+	}
 
-			if (Si1153_set_param(&hi2c1, SI1153_ADCCONFIG0_PARAM_ADDR, SI1153_ADCCONFIG_DEFAULT) != HAL_OK)
-			{
-				HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting channel 0 ADC config\r\n", strlen("Error setting channel 0 ADC config\r\n"), 1000);
-			}
-			else
-			{
-				HAL_UART_Transmit(&huart2, (uint8_t *) "Channel 0 ADC config set\r\n", strlen("Channel 0 ADC config set\r\n"), 1000);
-			}
+	if (Si1153_set_param(&hi2c1, SI1153_ADCCONFIG0_PARAM_ADDR, SI1153_ADCCONFIG_DEFAULT) != HAL_OK)
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting channel 0 ADC config\r\n", strlen("Error setting channel 0 ADC config\r\n"), 1000);
+	}
+	else
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Channel 0 ADC config set\r\n", strlen("Channel 0 ADC config set\r\n"), 1000);
+	}
 
+	if (Si1153_set_param(&hi2c1, SI1153_ADCSENS0_PARAM_ADDR, SI1153_ADCSENS_DEFAULT) != HAL_OK)
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting channel 0 ADC sens\r\n", strlen("Error setting channel 0 ADC sens\r\n"), 1000);
+	}
+	else
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Channel 0 ADC sens set\r\n", strlen("Channel 0 ADC sens set\r\n"), 1000);
+	}
 
+	if (Si1153_set_param(&hi2c1, SI1153_ADCPOST0_PARAM_ADDR, SI1153_ADCPOST_DEFAULT) != HAL_OK)
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting channel 0 ADC post\r\n", strlen("Error setting channel 0 ADC post\r\n"), 1000);
+	}
+	else
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Channel 0 ADC post set\r\n", strlen("Channel 0 ADC post set\r\n"), 1000);
+	}
 
-			if (Si1153_set_param(&hi2c1, SI1153_ADCSENS0_PARAM_ADDR, SI1153_ADCSENS_DEFAULT) != HAL_OK)
-			{
-				HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting channel 0 ADC sens\r\n", strlen("Error setting channel 0 ADC sens\r\n"), 1000);
-			}
-			else
-			{
-				HAL_UART_Transmit(&huart2, (uint8_t *) "Channel 0 ADC sens set\r\n", strlen("Channel 0 ADC sens set\r\n"), 1000);
-			}
+	if (Si1153_set_param(&hi2c1, SI1153_MEASCONFIG0_PARAM_ADDR, SI1153_MEASCONFIG_DEFAULT) != HAL_OK)
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting channel 0 measurement config\r\n", strlen("Error setting channel 0 measurement config\r\n"), 1000);
+	}
+	else
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Channel 0 measurement config set\r\n", strlen("Channel 0 measurement config set\r\n"), 1000);
+	}
 
-
-
-			if (Si1153_set_param(&hi2c1, SI1153_ADCPOST0_PARAM_ADDR, SI1153_ADCPOST_DEFAULT) != HAL_OK)
-			{
-				HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting channel 0 ADC post\r\n", strlen("Error setting channel 0 ADC post\r\n"), 1000);
-			}
-			else
-			{
-				HAL_UART_Transmit(&huart2, (uint8_t *) "Channel 0 ADC post set\r\n", strlen("Channel 0 ADC post set\r\n"), 1000);
-			}
-
-			if (Si1153_set_param(&hi2c1, SI1153_MEASCONFIG0_PARAM_ADDR, SI1153_MEASCONFIG_DEFAULT) != HAL_OK)
-			{
-				HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting channel 0 measurement config\r\n", strlen("Error setting channel 0 measurement config\r\n"), 1000);
-			}
-			else
-			{
-				HAL_UART_Transmit(&huart2, (uint8_t *) "Channel 0 measurement config set\r\n", strlen("Channel 0 measurement config set\r\n"), 1000);
-			}
-
-			if (Si1153_start_autonomous_mode(&hi2c1) != HAL_OK)
-			{
-				HAL_UART_Transmit(&huart2, (uint8_t *) "Error: could not initiate autonomous measurements\r\n", strlen("Error: could not initiate autonomous measurements\r\n"), 1000);
-			}
-			else
-			{
-				HAL_UART_Transmit(&huart2, (uint8_t *) "Autonomous measurements initiated\r\n", strlen("Autonomous measurements initiated\r\n"), 1000);
-			}
+	if (Si1153_start_autonomous_mode(&hi2c1) != HAL_OK)
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Error: could not initiate autonomous measurements\r\n", strlen("Error: could not initiate autonomous measurements\r\n"), 1000);
+	}
+	else
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Autonomous measurements initiated\r\n", strlen("Autonomous measurements initiated\r\n"), 1000);
+	}
 	/* Infinite loop */
 
 	for(;;) {
@@ -529,7 +593,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-
+  else if (htim->Instance == TIM6)
+  {
+	  /* TIM6 is the debounce timer */
+	  button_ready = 1;
+	  HAL_TIM_Base_Stop_IT(&htim6);
+  }
   /* USER CODE END Callback 1 */
 }
 
