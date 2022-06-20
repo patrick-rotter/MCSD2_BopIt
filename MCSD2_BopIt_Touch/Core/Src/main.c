@@ -25,6 +25,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "CY8C201A0.h"
+#include "wifible.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
