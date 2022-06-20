@@ -93,11 +93,11 @@ const ChallengeCard = () => {
               />
               <Image url={challenge.img} />
               <Description text={challenge.description} />
-              <p>{challenge.cmd}</p>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
+      <div>{challenge.cmd}</div>
 
       <AnimatePresence>
         {!isAlive && (

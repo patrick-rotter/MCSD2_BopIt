@@ -14,19 +14,19 @@ const challenges = [
     cmd: "11",
     module: DISTANCE_CLICK,
     img: "https://i.imgur.com/iusmMD6.jpg",
-    description: "Measure a distance of 7 cm and push the button!",
+    description: "Measure less than 5 cm!",
   },
   {
     cmd: "12",
     module: DISTANCE_CLICK,
     img: "https://i.imgur.com/418bHAt.jpg",
-    description: "Measure a distance of 11 cm and push the button!",
+    description: "Measure more than 15 cm!",
   },
   {
     cmd: "13",
     module: DISTANCE_CLICK,
     img: "https://i.imgur.com/S0c5Tpp.jpg",
-    description: "Measure a distance of 23 cm and push the button!",
+    description: "Measure exactly 10 cm!",
   },
   {
     cmd: "21",
@@ -50,19 +50,19 @@ const challenges = [
     cmd: "31",
     module: TOUCH_CLICK,
     img: "https://i.imgur.com/ok6YqKC.jpg",
-    description: "Touch the lower touch button on the touchpad!",
+    description: "Touch the lower touch button!",
   },
   {
     cmd: "32",
     module: TOUCH_CLICK,
     img: "https://i.imgur.com/gYAKQhL.jpg",
-    description: "Touch the middle touch button on the touchpad!",
+    description: "Touch the middle touch button!",
   },
   {
     cmd: "33",
     module: TOUCH_CLICK,
     img: "https://i.imgur.com/Q3jLT0Q.jpg",
-    description: "Touch the upper touch button on the touchpad!",
+    description: "Touch the upper touch button!",
   },
 ];
 
