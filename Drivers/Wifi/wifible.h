@@ -33,7 +33,7 @@ typedef uint8_t wifible_error_t;
  *
  * @description This function initializes all necessary pins and peripherals used for this click.
  */
-void wifible_init(UART_HandleTypeDef *uart, osSemaphoreId_t cont);
+void wifible_init(UART_HandleTypeDef *uart);
 
 /**
  * @brief Generic write function.

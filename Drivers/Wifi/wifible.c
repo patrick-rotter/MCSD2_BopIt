@@ -11,7 +11,7 @@
 
 // ------------------------------------------------ PUBLIC FUNCTION DEFINITIONS
 
-void wifible_init(UART_HandleTypeDef *uart, osSemaphoreId_t cont) {
+void wifible_init(UART_HandleTypeDef *uart) {
 	msgrx_init(uart);
 	osDelay(500);
 	wifible_send_command("AT+GMR");

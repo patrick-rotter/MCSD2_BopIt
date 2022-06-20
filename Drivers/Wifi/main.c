@@ -409,8 +409,9 @@ void StartCmdTask(void *argument)
 {
   /* USER CODE BEGIN StartCmdTask */
 	printf("Projekt\r\n");
-	wifible_init(&huart1, wifiContinueSemHandle);
-	connectWifi("Javaliero", "florianparzer");
+	wifible_init(&huart1);
+	connectWifi("A1 Dachgeschoss", "Parzer123!");
+	//connectWifi("Javaliero", "florianparzer");
 	sendHttpPost("172.20.10.13", "/api/challanges", 1, 11);
 	/* Infinite loop */
 	for (;;) {
