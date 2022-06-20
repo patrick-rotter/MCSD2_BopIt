@@ -24,6 +24,7 @@
 /* USER CODE BEGIN Includes */
 #include <string.h>
 #include <stdio.h>
+#include <errno.h>
 #include "CY8C201A0.h"
 #include "wifible.h"
 /* USER CODE END Includes */
@@ -35,6 +36,9 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define STDIN_FILENO  0
+#define STDOUT_FILENO 1
+#define STDERR_FILENO 2
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -43,7 +47,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-I2C_HandleTypeDef hi2c1;
+ I2C_HandleTypeDef hi2c1;
 
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
@@ -196,10 +200,12 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+
   /** Configure LSE Drive Capability
   */
   HAL_PWR_EnableBkUpAccess();
   __HAL_RCC_LSEDRIVE_CONFIG(RCC_LSEDRIVE_LOW);
+
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
@@ -219,6 +225,7 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+
   /** Initializes the CPU, AHB and APB buses clocks
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
@@ -232,6 +239,7 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+
   /** Enable MSI Auto calibration
   */
   HAL_RCCEx_EnableMSIPLLMode();
@@ -265,12 +273,14 @@ static void MX_I2C1_Init(void)
   {
     Error_Handler();
   }
+
   /** Configure Analogue filter
   */
   if (HAL_I2CEx_ConfigAnalogFilter(&hi2c1, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
   {
     Error_Handler();
   }
+
   /** Configure Digital filter
   */
   if (HAL_I2CEx_ConfigDigitalFilter(&hi2c1, 0) != HAL_OK)
@@ -396,7 +406,29 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+/**
+ * @brief Function that writes the char pointer to the UART Interface.
+ * @param ptr: char pointer to the String
+ * @param len: length of the String
+ * @retval EIO: returns IO Error
+ * @retval len: returns the length of the String and means no error
+ * @return returns the length of the string or in case of erros -1 or IO Error
+ */
+int _write(int file, char *ptr, int len) {
+	if (file == STDOUT_FILENO || file == STDERR_FILENO) {
+		//Write String over UART to Terminal
+		if (HAL_UART_Transmit(&huart2, (uint8_t*) ptr, len, HAL_MAX_DELAY)
+				== HAL_OK) {
+			return len;
+		} else {
+			//return IO Error
+			return EIO;
+		}
+	}
+	//Return File Descriptor Error
+	errno = EBADF;
+	return -1;
+}
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_start_touch_sensor_task */
@@ -523,6 +555,7 @@ void start_wifi_dispatcher_task(void *argument)
   /* Infinite loop */
 
 	wifible_init(&huart1);
+	connectWifi("Florian Handy", "florianparzer");
 
 
   for(;;)
@@ -534,12 +567,15 @@ void start_wifi_dispatcher_task(void *argument)
     	switch (message)
     	{
     	case CY8C201A0_CAPSENSE_0_CONFIG_TOP:
+    		sendHttpPost("172.20.10.13", "/api/challanges", 1, TOUCH_TOP);
     		HAL_UART_Transmit(&huart2, (uint8_t*) "Top button pressed\r\n", strlen("Top button pressed\r\n"), 1000);
     		break;
     	case CY8C201A0_CAPSENSE_0_CONFIG_BOTTOM:
+    		sendHttpPost("172.20.10.13", "/api/challanges", 1, TOUCH_BOTTOM);
     		HAL_UART_Transmit(&huart2, (uint8_t*) "Bottom button pressed\r\n", strlen("Bottom button pressed\r\n"), 1000);
     		break;
     	case CY8C201A0_CAPSENSE_1_CONFIG_ALL:
+    		sendHttpPost("172.20.10.13", "/api/challanges", 1, TOUCH_MID);
     		HAL_UART_Transmit(&huart2, (uint8_t*) "Mid button pressed\r\n", strlen("Mid button pressed\r\n"), 1000);
     		break;
     	default:
@@ -605,4 +641,3 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
-

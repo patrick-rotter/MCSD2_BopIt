@@ -9,6 +9,8 @@
 #include "string.h"
 #include "stdio.h"
 
+UART_HandleTypeDef *WIFI_BLE_Int;
+
 // ------------------------------------------------ PUBLIC FUNCTION DEFINITIONS
 
 void wifible_init(UART_HandleTypeDef *uart) {

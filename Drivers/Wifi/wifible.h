@@ -14,7 +14,7 @@
 
 #define BUFF_Size       128  /* must be power of two */
 
-UART_HandleTypeDef *WIFI_BLE_Int;
+extern UART_HandleTypeDef *WIFI_BLE_Int;
 static uint8_t circ_buffer[BUFF_Size];
 static uint32_t rd_ptr;
 
