@@ -26,6 +26,20 @@ static uint32_t rd_ptr;
  */
 typedef uint8_t wifible_error_t;
 
+typedef enum {
+	DIST_LESS_THAN_5 = 11,
+	DIST_MORE_THAN_15,
+	DIST_10,
+
+	JOYSTICK_UP = 21,
+	JOYSTICK_LEFT,
+	JOYSTICK_RIGHT,
+
+	TOUCH_BOTTOM = 31,
+	TOUCH_MID,
+	TOUCH_TOP
+} bop_it_command;
+
 /**
  * @brief Initialization function.
  * @param wifible Click object.
