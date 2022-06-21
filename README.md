@@ -37,7 +37,7 @@ ___
 
 ##### 2.1 Web-Dependancies
 
-[Node](https://nodejs.org/en/download/) must be installed manually. All other dependancies will automatically be installed with the npm package manager.
+[Node](https://nodejs.org/en/download/) must be installed manually. All other dependencies will automatically be installed with the npm package manager.
 (Used versions are in parenthesis.)
 * Node (v16.15.0)
 
@@ -51,7 +51,7 @@ ___
 
 ##### 2.2 Running the application
 
-Navigate into MCSD2_BopIt/Web/server and MCSD2_BopIt/Web/client and run ```npm install``` to install dependancies.
+Navigate into MCSD2_BopIt/Web/server and MCSD2_BopIt/Web/client and run ```npm install``` to install dependencies.
 To run the server, run ```node app.js``` in MCSD2_BopIt/Web/server.
 In order to run the client, execute ```npm start```.
 
