@@ -6,7 +6,7 @@
 
 This project is a simple, modern reinterpretation of the 90s toy [Bop It](https://en.wikipedia.org/wiki/Bop_It).
 ___
-#### 1. MCU + peripherals
+### 1. MCU + peripherals
 
 ##### 1.1 Required hardware
 * [STM32L432KC](https://www.st.com/en/microcontrollers-microprocessors/stm32l432kc.html) MCU
@@ -28,13 +28,12 @@ Please ensure that the initialization in each main.c is in the order below:
   MX_DMA_Init();
   MX_USART1_UART_Init();
   ```
-
 ##### 1.3 Documentation
 
 
 Please refer to the doxygen documentation for more details.
 ___
-#### 2. Web
+### 2. Web
 
 ##### 2.1 Web-Dependancies
 
