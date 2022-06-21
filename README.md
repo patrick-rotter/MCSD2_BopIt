@@ -53,6 +53,6 @@ ___
 
 Navigate into MCSD2_BopIt/Web/server and MCSD2_BopIt/Web/client and run ```npm install``` to install dependencies.<br>
 To run the server, run ```node app.js``` in MCSD2_BopIt/Web/server.<br>
-In order to run the client, execute ```npm start```in MCSD2_BopIt/Web/client.
+In order to run the client, execute ```npm start``` in MCSD2_BopIt/Web/client.
 
 
