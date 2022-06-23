@@ -375,14 +375,23 @@ void StartDefaultTask(void *argument)
 
 	  AS5013_hello_world((uint8_t *) "Joystick here\r\n");
 
-	  uint8_t id_code = AS5013_get_id_code(hi2c1);
+	  uint8_t id_code = 0;
+	  AS5013_get_id_code(&hi2c1, &id_code);
 
-	  //uint8_t id_code = HAL_I2C_IsDeviceReady(&hi2c1, AS5013_I2C_ADDRESS, 10, 5);
 
 	  uint8_t msg[50] = {0};
 
-	  sprintf((char *) msg, "Device status code is %x\r\n", id_code);
+	  sprintf((char *) msg, "Device status code is %#x\r\n", id_code);
 
+	  HAL_UART_Transmit(&huart2, msg, strlen((char *) msg), 1000);
+
+	  /* Both values are natively 8-bit signed two's complement on the sensor */
+	  int8_t x = 0;
+	  int8_t y = 0;
+	  AS5013_get_x(&hi2c1, &x);
+	  AS5013_get_y(&hi2c1, &y);
+
+	  sprintf((char *) msg, "X: %03d, Y: %03d\r\n", x, y);
 	  HAL_UART_Transmit(&huart2, msg, strlen((char *) msg), 1000);
 
 	  uint8_t id_msg[50] = {0};
@@ -391,8 +400,8 @@ void StartDefaultTask(void *argument)
 	  				sprintf((char *) id_msg, "Scanning i2c\r\n");
 	  				HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
 
-	  				for (int i = 0; i < 256; i++) {
-	  					ret = HAL_I2C_IsDeviceReady(&hi2c1, i << 0, 3, 10);
+	  				for (int i = 0; i < 128; i++) {
+	  					ret = HAL_I2C_IsDeviceReady(&hi2c1, i << 1, 3, 10);
 	  					if (ret == HAL_OK) {
 	  						sprintf((char *) id_msg, "Device found at: 0x%x\r\n", i);
 	  						HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
@@ -401,7 +410,7 @@ void StartDefaultTask(void *argument)
 	  					} else if (ret == HAL_BUSY) {
 	  						HAL_UART_Transmit(&huart2, (uint8_t *) "* ", strlen((char *) "* "), 1000);
 	  					}
-	  					osDelay(20);
+	  					osDelay(10);
 	  				}
 
 	  				sprintf((char *) id_msg, "Scanning done\r\n");

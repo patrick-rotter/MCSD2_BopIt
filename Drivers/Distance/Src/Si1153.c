@@ -21,7 +21,8 @@ HAL_StatusTypeDef Si1153_generic_read_single(I2C_HandleTypeDef *hi2c, uint8_t de
 }
 
 HAL_StatusTypeDef Si1153_generic_write_single(I2C_HandleTypeDef *hi2c, uint8_t device_register, uint8_t data) {
-	if (NULL == hi2c) {
+	if (NULL == hi2c)
+	{
 		return HAL_ERROR;
 	}
 
