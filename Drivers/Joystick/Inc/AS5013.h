@@ -33,8 +33,8 @@ HAL_StatusTypeDef AS5013_generic_write_single(I2C_HandleTypeDef *hi2c, uint8_t d
 
 HAL_StatusTypeDef AS5013_get_id_code(I2C_HandleTypeDef *hi2c, uint8_t *read_result);
 
-HAL_StatusTypeDef AS5013_get_x(I2C_HandleTypeDef *hi2c, uint8_t *read_result);
-HAL_StatusTypeDef AS5013_get_y(I2C_HandleTypeDef *hi2c, uint8_t *read_result);
+HAL_StatusTypeDef AS5013_get_x(I2C_HandleTypeDef *hi2c, int8_t *read_result);
+HAL_StatusTypeDef AS5013_get_y(I2C_HandleTypeDef *hi2c, int8_t *read_result);
 
 
 #endif

@@ -40,5 +40,10 @@
 			<type>2</type>
 			<locationURI>$%7BPARENT-1-PROJECT_LOC%7D/Drivers/Joystick/Src</locationURI>
 		</link>
+		<link>
+			<name>Wifi</name>
+			<type>2</type>
+			<locationURI>$%7BPARENT-1-PROJECT_LOC%7D/Drivers/Wifi</locationURI>
+		</link>
 	</linkedResources>
 </projectDescription>
