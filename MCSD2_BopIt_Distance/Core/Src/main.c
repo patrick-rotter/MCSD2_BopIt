@@ -24,8 +24,10 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #include <float.h>
 #include "Si1153.h"
+#include "wifible.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -36,6 +38,9 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define measure_event_flag 1
+#define STDIN_FILENO  0
+#define STDOUT_FILENO 1
+#define STDERR_FILENO 2
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -50,12 +55,13 @@ TIM_HandleTypeDef htim6;
 
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
+DMA_HandleTypeDef hdma_usart1_rx;
 
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
-  .stack_size = 512 * 4,
+  .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for measureEvent */
@@ -99,8 +105,10 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_USART1_UART_Init(void);
+static void MX_DMA_Init(void);
 static void MX_TIM6_Init(void);
 void StartDefaultTask(void *argument);
+int _write(int file, char *ptr, int len);
 
 /* USER CODE BEGIN PFP */
 uint8_t Si1153_ADC_to_cm(uint16_t ADC_value);
@@ -141,6 +149,7 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_I2C1_Init();
+  MX_DMA_Init();
   MX_USART1_UART_Init();
   MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
@@ -408,6 +417,22 @@ static void MX_USART2_UART_Init(void)
 }
 
 /**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Channel5_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel5_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel5_IRQn);
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -470,6 +495,8 @@ uint8_t Si1153_ADC_to_cm(uint16_t ADC_value) {
 	return smallest_diff_i;
 }
 
+volatile uint8_t flag = 0;
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
   /* Prevent unused argument(s) compilation warning */
@@ -480,12 +507,37 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	  HAL_UART_Transmit(&huart2, (uint8_t *) "Interrupt!\r\n", strlen("Interrupt!\r\n"), 500);
 	  osEventFlagsSet(measureEventHandle, measure_event_flag);
 
+
 	  button_ready = 0;
 
 	  /* Disable the button until debounced, as reported by TIM6 */
 	  HAL_TIM_Base_Start_IT(&htim6);
   }
 
+}
+
+/**
+ * @brief Function that writes the char pointer to the UART Interface.
+ * @param ptr: char pointer to the String
+ * @param len: length of the String
+ * @retval EIO: returns IO Error
+ * @retval len: returns the length of the String and means no error
+ * @return returns the length of the string or in case of erros -1 or IO Error
+ */
+int _write(int file, char *ptr, int len) {
+	if (file == STDOUT_FILENO || file == STDERR_FILENO) {
+		//Write String over UART to Terminal
+		if (HAL_UART_Transmit(&huart2, (uint8_t*) ptr, len, HAL_MAX_DELAY)
+				== HAL_OK) {
+			return len;
+		} else {
+			//return IO Error
+			return EIO;
+		}
+	}
+	//Return File Descriptor Error
+	errno = EBADF;
+	return -1;
 }
 
 /* USER CODE END 4 */
@@ -501,6 +553,11 @@ void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
 	uint8_t msg[50];
+
+
+	wifible_init(&huart1);
+	connectWifi("Florian Handy", "florianparzer");
+
 
 	if (Si1153_set_param(&hi2c1, SI1153_CHAN_LIST_PARAM_ADDR, SI1153_CHAN_LIST_DEFAULT) != HAL_OK)
 	{
@@ -573,13 +630,20 @@ void StartDefaultTask(void *argument)
 	{
 		HAL_UART_Transmit(&huart2, (uint8_t *) "Autonomous measurements initiated\r\n", strlen("Autonomous measurements initiated\r\n"), 1000);
 	}
+
+
+
+
 	/* Infinite loop */
 
 	for(;;) {
 
+		//while(!flag);
+
 		osEventFlagsWait(measureEventHandle, measure_event_flag, 0, osWaitForever);
 
 		uint16_t chan_0 = 0;
+
 		if (Si1153_read_channel_0_16bit(&hi2c1, &chan_0) != HAL_OK)
 		{
 			HAL_UART_Transmit(&huart2, (uint8_t *) "Error reading channel 0\r\n", strlen("Error reading channel 0\r\n"), 1000);
@@ -587,10 +651,26 @@ void StartDefaultTask(void *argument)
 		else
 		{
 			/* Interfacing with the WiFi module goes here */
-			sprintf((char *) msg, "%05d - % 2d cm\r\n", chan_0, Si1153_ADC_to_cm(chan_0));
+			int cm = Si1153_ADC_to_cm(chan_0);
+			int message = 0;
+
+			if (cm <= 7) {
+				message = DIST_LESS_THAN_5;
+			} else if ((cm > 7) && (cm <=13)) {
+				message = DIST_10;
+			} else if (cm > 13) {
+				message = DIST_MORE_THAN_15;
+			}
+
+			sendHttpPost("192.168.43.198", "/api/challenges", 1, message);
+			sprintf((char *) msg, "%05d - % 2d cm\r\n", chan_0, cm);
 			HAL_UART_Transmit(&huart2, msg, strlen((char *) msg), 1000);
 		}
 
+		flag = 0;
+
+
+		//osDelay(2000);
 	}
   /* USER CODE END 5 */
 }
