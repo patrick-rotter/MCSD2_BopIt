@@ -377,10 +377,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LD3_GPIO_Port, &GPIO_InitStruct);
 
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI4_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI4_IRQn);
+
 }
 
 /* USER CODE BEGIN 4 */
-
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -416,37 +419,19 @@ void StartDefaultTask(void *argument)
 	  AS5013_get_x(&hi2c1, &x);
 	  AS5013_get_y(&hi2c1, &y);
 
+
+	  // UP -> X = 0, Y = 90+
+	  // DOWN -> X = 0, Y = -90-
+	  // LEFT -> X = 90+, Y = 0
+	  // RIGHT -> X = -80-, Y = 0
+
 	  sprintf((char *) msg, "X: %03d, Y: %03d\r\n", x, y);
 	  HAL_UART_Transmit(&huart2, msg, strlen((char *) msg), 1000);
 
 	  uint8_t id_msg[50] = {0};
 
-	  		uint8_t ret;
-	  				sprintf((char *) id_msg, "Scanning i2c\r\n");
-	  				HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
 
-	  				for (int i = 0; i < 128; i++) {
-	  					ret = HAL_I2C_IsDeviceReady(&hi2c1, i << 1, 3, 10);
-	  					if (ret == HAL_OK) {
-	  						sprintf((char *) id_msg, "Device found at: 0x%x\r\n", i);
-	  						HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
-	  					} else if (ret == HAL_ERROR) {
-	  						HAL_UART_Transmit(&huart2, (uint8_t *) "- ", strlen((char *) "- "), 1000);
-	  					} else if (ret == HAL_BUSY) {
-	  						HAL_UART_Transmit(&huart2, (uint8_t *) "* ", strlen((char *) "* "), 1000);
-	  					}
-	  					osDelay(10);
-	  				}
-
-	  				sprintf((char *) id_msg, "Scanning done\r\n");
-	  				HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
-	  				osDelay(500);
-
-	  				//uint8_t led_r = (uint8_t) HAL_GPIO_ReadPin(LED_RED_GPIO_Port, LED_RED_Pin);
-
-	  				//sprintf((char *) id_msg, "Red led: %d\r\n", led_r);
-	  				//HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
-	  osDelay(4000);
+	  osDelay(1500);
   }
   /* USER CODE END 5 */
 }

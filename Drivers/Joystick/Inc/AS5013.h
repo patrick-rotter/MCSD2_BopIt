@@ -20,7 +20,6 @@
 #define AS5013_SCALING_CONTROL_REG (0x2d)
 #define AS5013_CONTROL_REG_2 (0x2e)
 
-
 /* To be or'd with an internal register address when repeated reads are needed */
 #define AS5013_AUTO_INCREMENT_DISABLE (1 << 6)
 
@@ -28,7 +27,26 @@ extern UART_HandleTypeDef huart2;
 
 void AS5013_hello_world(uint8_t *echo);
 
+/**
+ * @brief Reads a single byte from a specified register on the AS5013.
+ *
+ * @param hi2c The handle of the I²C connection the AS5013 is on.
+ * @param device_register The AS5013 register to be read.
+ * @param data The read value will be written to this byte.
+ *
+ * @retval HAL_OK on success, HAL_ERROR on any kind of error, HAL_BUSY if the I²C connection is busy.
+ */
 HAL_StatusTypeDef AS5013_generic_read_single(I2C_HandleTypeDef *hi2c, uint8_t device_register, uint8_t *read_result);
+
+/**
+ * @brief Writes a single byte to a specified register on the AS5013.
+ *
+ * @param hi2c The handle of the I²C connection the AS5013 is on.
+ * @param device_register The AS5013 register to be written to.
+ * @param data The data to be written.
+ *
+ * @retval HAL_OK on success, HAL_ERROR on any kind of error, HAL_BUSY if the I²C connection is busy.
+ */
 HAL_StatusTypeDef AS5013_generic_write_single(I2C_HandleTypeDef *hi2c, uint8_t device_register, uint8_t data);
 
 HAL_StatusTypeDef AS5013_get_id_code(I2C_HandleTypeDef *hi2c, uint8_t *read_result);

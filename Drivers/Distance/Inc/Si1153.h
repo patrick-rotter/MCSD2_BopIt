@@ -5,7 +5,8 @@
 
 #define SI1153_I2C_ADDRESS (0x53 << 1)
 
-/* The SI1153 has two register sets. The I²C registers are directly accessible to the host/user and can be
+/* @file Si1153.h
+ * The SI1153 has two register sets. The I²C registers are directly accessible to the host/user and can be
  * read and written to directly, using the I²C interface. The second set of registers is the parameter table,
  * which is only indirectly accessible to the host. To read and write to the parameter table, one must make
  * use of the "COMMAND" I²C register. Writing a valid command code to the "COMMAND" register causes the
@@ -70,15 +71,15 @@
 
 /* SI1153 default channel settings */
 
-/* Use a 1024 clock cycle (48.8µs minimum) measurement time and the small infrared photodiode */
+/* @brief Use a 1024 clock cycle (48.8µs minimum) measurement time and the small infrared photodiode */
 #define SI1153_ADCCONFIG_DEFAULT (0x00)
-/* Low range, no measurement accumulation. The four LSBs determine the measurement time multiplier
+/* @brief Low range, no measurement accumulation. The four LSBs determine the measurement time multiplier
  * (with the multiplication base being 48.8µs, as specified in the default ADCCONFIG). This gives
  * us a measurement time of around 48.8µs * 2 ≈ 0.1ms */
 #define SI1153_ADCSENS_DEFAULT (0x02)
-/* 16 bit measurements, with no accumulation shift. Interrupt thresholds deactivated. */
+/* @brief 16 bit measurements, with no accumulation shift. Interrupt thresholds deactivated. */
 #define SI1153_ADCPOST_DEFAULT (0x00)
-/* Use measurement counter 0 (meaning it is mandatory to set it up), LEDs disabled. */
+/* @brief Use measurement counter 0 (meaning it is mandatory to set it up), LEDs disabled. */
 #define SI1153_MEASCONFIG_DEFAULT (0x40)
 
 /* SI1153 default global settings */
@@ -97,11 +98,32 @@
 #define SI1153_RESPONSE_ERROR_MASK (1 << 4)
 #define SI1153_RESPONSE_COMMAND_COUNTER_MASK (0x0f)
 
-extern UART_HandleTypeDef huart2;
-
+/**
+ * @brief Reads a single byte from a specified register on the Si1153.
+ *
+ * @param hi2c The handle of the I²C connection the Si1153 is on.
+ * @param device_register The Si1153 register to be read.
+ * @param data The read value will be written to this byte.
+ *
+ * @retval HAL_OK on success, HAL_ERROR on any kind of error, HAL_BUSY if the I²C connection is busy.
+ */
 HAL_StatusTypeDef Si1153_generic_read_single(I2C_HandleTypeDef *hi2c, uint8_t device_register, uint8_t *data);
+
+/**
+ * @brief Writes a single byte to a specified register on the Si1153.
+ *
+ * @param hi2c The handle of the I²C connection the Si1153 is on.
+ * @param device_register The Si1153 register to be written to.
+ * @param data The data to be written.
+ *
+ * @retval HAL_OK on success, HAL_ERROR on any kind of error, HAL_BUSY if the I²C connection is busy.
+ */
 HAL_StatusTypeDef Si1153_generic_write_single(I2C_HandleTypeDef *hi2c, uint8_t device_register, uint8_t data);
 
+/**
+ * @brief Get the part id of the Si1153. Should always yield the final the digits of the device
+ * identifier, in hexadecimal. In the case of the Si1153, this should be 0x53.
+ */
 HAL_StatusTypeDef Si1153_get_part_id(I2C_HandleTypeDef *hi2c, uint8_t *read_result);
 
 /**
@@ -138,8 +160,16 @@ HAL_StatusTypeDef Si1153_set_param(I2C_HandleTypeDef *hi2c, uint8_t parameter, u
  */
 HAL_StatusTypeDef Si1153_reset_command_counter(I2C_HandleTypeDef *hi2c);
 
+/**
+ * @brief Initiate autonomous mode, in which the Si1153 will periodically execute the measurements
+ * specified in its configuration and place their results in the HOSTOUTx registers.
+ */
 HAL_StatusTypeDef Si1153_start_autonomous_mode(I2C_HandleTypeDef *hi2c);
 
+/**
+ * @brief Reads the first two HOSTOUT registers under the assumption that the Si1153 is configured
+ * as to output its measurements to that exact location in a 16-bit format.
+ */
 HAL_StatusTypeDef Si1153_read_channel_0_16bit(I2C_HandleTypeDef *hi2c, uint16_t *channel_value);
 
 #endif

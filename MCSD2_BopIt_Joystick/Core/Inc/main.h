@@ -63,6 +63,7 @@ void Error_Handler(void);
 #define VCP_TX_GPIO_Port GPIOA
 #define JOYSTICK_BUTTON_Pin GPIO_PIN_4
 #define JOYSTICK_BUTTON_GPIO_Port GPIOA
+#define JOYSTICK_BUTTON_EXTI_IRQn EXTI4_IRQn
 #define SWDIO_Pin GPIO_PIN_13
 #define SWDIO_GPIO_Port GPIOA
 #define SWCLK_Pin GPIO_PIN_14

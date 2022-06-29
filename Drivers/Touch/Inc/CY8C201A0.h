@@ -10,12 +10,12 @@
 #define CY8C201A0_INPUT_0_REG 0x00
 #define CY8C201A0_INPUT_1_REG 0x01
 
-/* Enable standalone touchpads as touchsense pads */
+/* @brief Enable standalone touchpads as touchsense pads */
 #define CY8C201A0_CAPSENSE_ENABLE_0_REG 0x06
-/* Enable slider touchpads as touchsense pads */
+/* @brief Enable slider touchpads as touchsense pads */
 #define CY8C201A0_CAPSENSE_ENABLE_1_REG 0x07
 
-/* Enable slider pads and determine their number (5 or 10) */
+/* @brief Enable slider pads and determine their number (5 or 10) */
 #define CY8C201A0_CAPSENSE_SLIDER_CONFIG_REG 0x75
 
 #define CY8C201A0_SLIDER_RESOLUTION_0_REG 0x77
@@ -25,7 +25,8 @@
 
 #define CY8C201A0_DEVICE_ID_REG 0x7a
 
-/* To write to 0x7c, register 0x79 must be unlocked. Changes to 0x7c will only be applied after 0x79 is locked again */
+/* @brief To write to 0x7c, register 0x79 must be unlocked. Changes to 0x7c will only be applied after 0x79 is
+ * locked again */
 #define CY8C201A0_I2C_ADDRESS_REG 0x7c
 
 /* Used to read the pad touch status */
@@ -46,10 +47,27 @@
 #define CY8C201A0_CAPSENSE_0_CONFIG_BOTTOM (1 << 4)
 #define CY8C201A0_CAPSENSE_1_CONFIG_ALL (0x1f)
 
-extern UART_HandleTypeDef huart2;
-
-HAL_StatusTypeDef CY8_generic_write_single(I2C_HandleTypeDef *hi2c, uint8_t device_register, uint8_t data);
+/**
+ * @brief Reads a single byte from a specified register on the CY8C201A0.
+ *
+ * @param hi2c The handle of the I²C connection the CY8C201A0 is on.
+ * @param device_register The CY8C201A0 register to be read.
+ * @param data The read value will be written to this byte.
+ *
+ * @retval HAL_OK on success, HAL_ERROR on any kind of error, HAL_BUSY if the I²C connection is busy.
+ */
 HAL_StatusTypeDef CY8_generic_read_single(I2C_HandleTypeDef *hi2c, uint8_t device_register, uint8_t *data);
+
+/**
+ * @brief Writes a single byte to a specified register on the CY8C201A0.
+ *
+ * @param hi2c The handle of the I²C connection the CY8C201A0 is on.
+ * @param device_register The CY8C201A0 register to be written to.
+ * @param data The data to be written.
+ *
+ * @retval HAL_OK on success, HAL_ERROR on any kind of error, HAL_BUSY if the I²C connection is busy.
+ */
+HAL_StatusTypeDef CY8_generic_write_single(I2C_HandleTypeDef *hi2c, uint8_t device_register, uint8_t data);
 
 /**
  * @brief Sends a command code to the sensor and blocks the calling task for CY8C201A0_COMMAND_WAIT_TIME_MS if the code was
@@ -110,9 +128,9 @@ HAL_StatusTypeDef CY8_enable_slider(I2C_HandleTypeDef *hi2c, uint8_t slider_pad_
 HAL_StatusTypeDef CY8_set_slider_resolution(I2C_HandleTypeDef *hi2c, uint8_t resolution_code);
 
 /**
- * @brief Transmits the control sequence that unlocks the CY8C201A0's i²c address register.
+ * @brief Transmits the control sequence that unlocks the CY8C201A0's I²C address register.
  *
- * @param address The CY8C201A0's i²c address at time of calling.
+ * @param address The CY8C201A0's I²C address at time of calling.
  */
 HAL_StatusTypeDef CY8_unlock_i2c_reg(I2C_HandleTypeDef *hi2c, uint8_t address);
 
@@ -130,12 +148,26 @@ HAL_StatusTypeDef CY8_lock_i2c_reg(I2C_HandleTypeDef *hi2c, uint8_t address);
  */
 HAL_StatusTypeDef CY8_set_i2c_addr(I2C_HandleTypeDef *hi2c, uint8_t old_address, uint8_t new_address);
 
+/**
+ * @brief Sets the configuration specified by config to the CY8C201A0's capsense 0 pads. Capsense 0 refers to the
+ * top and bottom touchpads.
+ */
 HAL_StatusTypeDef CY8_set_capsense_0_config(I2C_HandleTypeDef *hi2c, uint8_t config);
 
+/**
+ * @brief Sets the configuration specified by config to the CY8C201A0's capsense 1 pads. Capsense 1 refers to the
+ * middle touchpads.
+ */
 HAL_StatusTypeDef CY8_set_capsense_1_config(I2C_HandleTypeDef *hi2c, uint8_t config);
 
+/**
+ * @brief Reads the status of the CY8C201A0's capsense 0 pads. Capsense 0 refers to the top and bottom touchpads.
+ */
 HAL_StatusTypeDef CY8_read_capsense_0(I2C_HandleTypeDef *hi2c, uint8_t *read_result);
 
+/**
+ * @brief Reads the status of the CY8C201A0's capsense 1 pads. Capsense 1 refers to the middle touchpads.
+ */
 HAL_StatusTypeDef CY8_read_capsense_1(I2C_HandleTypeDef *hi2c, uint8_t *read_result);
 
 /**
