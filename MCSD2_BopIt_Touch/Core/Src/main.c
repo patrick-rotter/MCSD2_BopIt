@@ -441,23 +441,25 @@ int _write(int file, char *ptr, int len) {
 void start_touch_sensor_task(void *argument)
 {
   /* USER CODE BEGIN 5 */
-	uint8_t id_msg[50] = {0};
-
-
-	HAL_StatusTypeDef init_result = CY8_init(	&hi2c1,
-												&huart2,
-												CY8C201A0_CAPSENSE_0_CONFIG_TOP | CY8C201A0_CAPSENSE_0_CONFIG_BOTTOM,
-												CY8C201A0_CAPSENSE_1_CONFIG_ALL,
-												5,
-												0x10);
-
-	if (HAL_OK == init_result)
+	while(1)
 	{
-		HAL_UART_Transmit(&huart2, (uint8_t *) "CY8C201A0 initiated\r\n", strlen("CY8C201A0 initiated\r\n"), 1000);
-	}
-	else
-	{
-		HAL_UART_Transmit(&huart2, (uint8_t *) "CY8C201A0 initiation failed\r\n", strlen("CY8C201A0 initiation failed\r\n"), 1000);
+		HAL_StatusTypeDef init_result = CY8_init(	&hi2c1,
+													&huart2,
+													CY8C201A0_CAPSENSE_0_CONFIG_TOP | CY8C201A0_CAPSENSE_0_CONFIG_BOTTOM,
+													CY8C201A0_CAPSENSE_1_CONFIG_ALL,
+													5,
+													0x10);
+
+		if (HAL_OK == init_result)
+		{
+			HAL_UART_Transmit(&huart2, (uint8_t *) "CY8C201A0 initiated\r\n", strlen("CY8C201A0 initiated\r\n"), 1000);
+			break;
+		}
+		else
+		{
+			HAL_UART_Transmit(&huart2, (uint8_t *) "CY8C201A0 initiation failed, retrying...\r\n", strlen("CY8C201A0 initiation failed, retrying...\r\n"), 1000);
+			osDelay(3000);
+		}
 	}
 
 	/* Used to register when a button has been released */
@@ -515,28 +517,6 @@ void start_touch_sensor_task(void *argument)
 
 
 		osDelay(50);
-
-
-
-/*
-		sprintf((char *) id_msg, "Scanning i2c\r\n");
-		HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
-
-		for (int i = 0; i < 128; i++) {
-			ret = HAL_I2C_IsDeviceReady(&hi2c1, i << 1, 3, 10);
-			if (ret == HAL_OK) {
-				sprintf((char *) id_msg, "Device found at: 0x%x\r\n", i);
-				HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000);
-			} else if (ret == HAL_ERROR) {
-				HAL_UART_Transmit(&huart2, (uint8_t *) "- ", strlen((char *) "- "), 1000);
-			} else if (ret == HAL_BUSY) {
-				HAL_UART_Transmit(&huart2, (uint8_t *) "* ", strlen((char *) "* "), 1000);
-			}
-			osDelay(50);
-		}
-
-		sprintf((char *) id_msg, "Scanning done\r\n");
-		HAL_UART_Transmit(&huart2, id_msg, strlen((char *) id_msg), 1000); */
 
 	}
   /* USER CODE END 5 */

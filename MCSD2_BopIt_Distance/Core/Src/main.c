@@ -495,8 +495,6 @@ uint8_t Si1153_ADC_to_cm(uint16_t ADC_value) {
 	return smallest_diff_i;
 }
 
-volatile uint8_t flag = 0;
-
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
   /* Prevent unused argument(s) compilation warning */
@@ -655,14 +653,13 @@ void StartDefaultTask(void *argument)
 		{
 			break;
 		}
+		osDelay(3000);
 	}
 
 
 	/* Infinite loop */
 
 	for(;;) {
-
-		//while(!flag);
 
 		osEventFlagsWait(measureEventHandle, measure_event_flag, 0, osWaitForever);
 
@@ -691,10 +688,6 @@ void StartDefaultTask(void *argument)
 			HAL_UART_Transmit(&huart2, msg, strlen((char *) msg), 1000);
 		}
 
-		flag = 0;
-
-
-		//osDelay(2000);
 	}
   /* USER CODE END 5 */
 }
