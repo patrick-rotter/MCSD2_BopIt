@@ -49,9 +49,21 @@ HAL_StatusTypeDef AS5013_generic_read_single(I2C_HandleTypeDef *hi2c, uint8_t de
  */
 HAL_StatusTypeDef AS5013_generic_write_single(I2C_HandleTypeDef *hi2c, uint8_t device_register, uint8_t data);
 
+/**
+ * @brief Reads the device id register. Hardware specific.
+ */
 HAL_StatusTypeDef AS5013_get_id_code(I2C_HandleTypeDef *hi2c, uint8_t *read_result);
 
+/**
+ * @brief Reads the AS5013 joystick's x component. Note that its format it natively signed two's complement
+ * eight bit integer.
+ */
 HAL_StatusTypeDef AS5013_get_x(I2C_HandleTypeDef *hi2c, int8_t *read_result);
+
+/**
+ * @brief Reads the AS5013 joystick's y component. Note that its format it natively signed two's complement
+ * eight bit integer.
+ */
 HAL_StatusTypeDef AS5013_get_y(I2C_HandleTypeDef *hi2c, int8_t *read_result);
 
 
