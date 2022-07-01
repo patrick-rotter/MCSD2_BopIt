@@ -420,6 +420,9 @@ void start_sensor_task(void *argument)
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
 
+	wifible_init(&huart1);
+	connectWifi("Florian Handy", "florianparzer");
+
 	uint8_t joystick_up_previous = 0;
 	uint8_t joystick_left_previous = 0;
 	uint8_t joystick_right_previous = 0;
@@ -429,30 +432,17 @@ void start_sensor_task(void *argument)
 	  // SDA -> D4
 	  // SCL -> D5
 
-	  /*uint8_t id_code = 0;
-	  AS5013_get_id_code(&hi2c1, &id_code);
-
-	  uint8_t msg[50] = {0};
-
-	  sprintf((char *) msg, "Device status code is %#x\r\n", id_code);
-
-	  HAL_UART_Transmit(&huart2, msg, strlen((char *) msg), 1000);*/
-
 	  /* Both values are natively 8-bit signed two's complement on the sensor */
 	  int8_t x = 0;
 	  int8_t y = 0;
 	  AS5013_get_x(&hi2c1, &x);
 	  AS5013_get_y(&hi2c1, &y);
 
-
 	  // UP -> X = 0, Y = 90+
 	  // DOWN -> X = 0, Y = -90-
 	  // LEFT -> X = 90+, Y = 0
 	  // RIGHT -> X = -80-, Y = 0
-/*
-	  sprintf((char *) msg, "X: %03d, Y: %03d\r\n", x, y);
-	  HAL_UART_Transmit(&huart2, msg, strlen((char *) msg), 1000);
-*/
+
 	  uint8_t joystick_up_current = 0;
 	  uint8_t joystick_left_current = 0;
 	  uint8_t joystick_right_current = 0;
@@ -544,15 +534,15 @@ void start_wifi_task(void *argument)
     {
     	case JOYSTICK_UP:
     		HAL_UART_Transmit(&huart2, (uint8_t *) "Up!\r\n", strlen("Up!\r\n"), 1000);
-    		//sendHttpPost("192.168.43.198", "/api/challenges", 1, message);
+    		sendHttpPost("192.168.43.198", "/api/challenges", 1, message);
     		break;
     	case JOYSTICK_LEFT:
     		HAL_UART_Transmit(&huart2, (uint8_t *) "Left!\r\n", strlen("Left!\r\n"), 1000);
-    		//sendHttpPost("192.168.43.198", "/api/challenges", 1, message);
+    		sendHttpPost("192.168.43.198", "/api/challenges", 1, message);
     		break;
     	case JOYSTICK_RIGHT:
     		HAL_UART_Transmit(&huart2, (uint8_t *) "Right\r\n", strlen("Right\r\n"), 1000);
-    		//sendHttpPost("192.168.43.198", "/api/challenges", 1, message);
+    		sendHttpPost("192.168.43.198", "/api/challenges", 1, message);
     		break;
     	default:
     		HAL_UART_Transmit(&huart2, (uint8_t *) "Error: illegal joystick queue message\r\n", strlen("Error: illegal joystick queue message\r\n"), 1000);
