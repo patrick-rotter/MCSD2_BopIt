@@ -628,7 +628,7 @@ HAL_StatusTypeDef initialize_sensor() {
 		HAL_UART_Transmit(&huart2, (uint8_t *) "Autonomous measurements initiated\r\n", strlen("Autonomous measurements initiated\r\n"), 1000);
 	}
 
-	return 0 != error_counter ? HAL_ERROR : HAL_OK;
+	return error_counter ? HAL_ERROR : HAL_OK;
 }
 
 /* USER CODE END 4 */

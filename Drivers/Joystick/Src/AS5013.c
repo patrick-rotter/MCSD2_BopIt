@@ -2,10 +2,6 @@
 #include "AS5013.h"
 #include <string.h>
 
-void AS5013_hello_world(uint8_t *echo) {
-	HAL_UART_Transmit(&huart2, echo, strlen((const char *) echo), 1000);
-}
-
 HAL_StatusTypeDef AS5013_generic_read_single(I2C_HandleTypeDef *hi2c, uint8_t device_register, uint8_t *read_result) {
 	if ((NULL == hi2c) || (NULL == read_result))
 	{

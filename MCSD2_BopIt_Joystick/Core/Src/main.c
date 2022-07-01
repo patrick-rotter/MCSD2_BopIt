@@ -26,6 +26,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "AS5013.h"
+#include "wifible.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,12 +50,24 @@ UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 DMA_HandleTypeDef hdma_usart1_rx;
 
-/* Definitions for defaultTask */
-osThreadId_t defaultTaskHandle;
-const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
+/* Definitions for sensorTask */
+osThreadId_t sensorTaskHandle;
+const osThreadAttr_t sensorTask_attributes = {
+  .name = "sensorTask",
   .stack_size = 512 * 4,
+  .priority = (osPriority_t) osPriorityHigh,
+};
+/* Definitions for wifiTask */
+osThreadId_t wifiTaskHandle;
+const osThreadAttr_t wifiTask_attributes = {
+  .name = "wifiTask",
+  .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for joystickEventQueue */
+osMessageQueueId_t joystickEventQueueHandle;
+const osMessageQueueAttr_t joystickEventQueue_attributes = {
+  .name = "joystickEventQueue"
 };
 /* USER CODE BEGIN PV */
 
@@ -67,7 +80,8 @@ static void MX_USART2_UART_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_DMA_Init(void);
 static void MX_USART1_UART_Init(void);
-void StartDefaultTask(void *argument);
+void start_sensor_task(void *argument);
+void start_wifi_task(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -129,13 +143,20 @@ int main(void)
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
 
+  /* Create the queue(s) */
+  /* creation of joystickEventQueue */
+  joystickEventQueueHandle = osMessageQueueNew (16, sizeof(uint16_t), &joystickEventQueue_attributes);
+
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  /* creation of sensorTask */
+  sensorTaskHandle = osThreadNew(start_sensor_task, NULL, &sensorTask_attributes);
+
+  /* creation of wifiTask */
+  wifiTaskHandle = osThreadNew(start_wifi_task, NULL, &wifiTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -387,17 +408,16 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_StartDefaultTask */
+/* USER CODE BEGIN Header_start_sensor_task */
 /**
-  * @brief  Function implementing the defaultTask thread.
+  * @brief  Function implementing the sensorTask thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void *argument)
+/* USER CODE END Header_start_sensor_task */
+void start_sensor_task(void *argument)
 {
   /* USER CODE BEGIN 5 */
-	//HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
   /* Infinite loop */
 
 	uint8_t joystick_up_previous = 0;
@@ -406,14 +426,17 @@ void StartDefaultTask(void *argument)
   for(;;)
   {
 
-	  uint8_t id_code = 0;
+	  // SDA -> D4
+	  // SCL -> D5
+
+	  /*uint8_t id_code = 0;
 	  AS5013_get_id_code(&hi2c1, &id_code);
 
 	  uint8_t msg[50] = {0};
 
 	  sprintf((char *) msg, "Device status code is %#x\r\n", id_code);
 
-	  HAL_UART_Transmit(&huart2, msg, strlen((char *) msg), 1000);
+	  HAL_UART_Transmit(&huart2, msg, strlen((char *) msg), 1000);*/
 
 	  /* Both values are natively 8-bit signed two's complement on the sensor */
 	  int8_t x = 0;
@@ -426,15 +449,18 @@ void StartDefaultTask(void *argument)
 	  // DOWN -> X = 0, Y = -90-
 	  // LEFT -> X = 90+, Y = 0
 	  // RIGHT -> X = -80-, Y = 0
-
+/*
 	  sprintf((char *) msg, "X: %03d, Y: %03d\r\n", x, y);
 	  HAL_UART_Transmit(&huart2, msg, strlen((char *) msg), 1000);
-
+*/
 	  uint8_t joystick_up_current = 0;
 	  uint8_t joystick_left_current = 0;
 	  uint8_t joystick_right_current = 0;
 
-	  if ((75 <= y) && (abs(x) < 15))
+	  #define MAX_DEVIATION 25
+	  #define DETECTION_THRESHOLD 75
+
+	  if ((DETECTION_THRESHOLD <= y) && (abs(x) < MAX_DEVIATION))
 	  {
 		  joystick_up_current = 1;
 	  }
@@ -443,7 +469,7 @@ void StartDefaultTask(void *argument)
 		  joystick_up_current = 0;
 	  }
 
-	  if ((75 <= x) && (abs(y) < 15))
+	  if ((DETECTION_THRESHOLD <= x) && (abs(y) < MAX_DEVIATION))
 	  {
 	  	  joystick_left_current = 1;
 	  }
@@ -452,7 +478,7 @@ void StartDefaultTask(void *argument)
 		  joystick_left_current = 0;
 	  }
 
-	  if ((-75 >= x) && (abs(y) < 15))
+	  if ((-DETECTION_THRESHOLD >= x) && (abs(y) < MAX_DEVIATION))
 	  {
 	   	  joystick_right_current = 1;
 	  }
@@ -467,28 +493,73 @@ void StartDefaultTask(void *argument)
 	  if (joystick_up_current && !joystick_up_previous)
 	  {
 		  /* Up */
-		  HAL_UART_Transmit(&huart1, (uint8_t *) "Up!", strlen("Up!"), 1000);
+
+
+		  uint16_t q_message = JOYSTICK_UP;
+		  osMessageQueuePut(joystickEventQueueHandle, &q_message, 0, 0);
 	  }
 
 	  if (joystick_left_current && !joystick_left_previous)
 	  {
 		  /* Left */
-		  HAL_UART_Transmit(&huart1, (uint8_t *) "Left!", strlen("Left!"), 1000);
+
+		  uint16_t q_message = JOYSTICK_LEFT;
+		  osMessageQueuePut(joystickEventQueueHandle, &q_message, 0, 0);
 	  }
 
 	  if (joystick_right_current && !joystick_right_previous)
 	  {
 		  /* Right */
-		  HAL_UART_Transmit(&huart1, (uint8_t *) "Right", strlen("Right"), 1000);
+
+		  uint16_t q_message = JOYSTICK_RIGHT;
+		  osMessageQueuePut(joystickEventQueueHandle, &q_message, 0, 0);
 	  }
 
 	  joystick_up_previous = joystick_up_current;
 	  joystick_left_previous = joystick_left_current;
 	  joystick_right_previous = joystick_right_current;
 
-	  osDelay(750);
+	  osDelay(35);
   }
   /* USER CODE END 5 */
+}
+
+/* USER CODE BEGIN Header_start_wifi_task */
+/**
+* @brief Function implementing the wifiTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_start_wifi_task */
+void start_wifi_task(void *argument)
+{
+  /* USER CODE BEGIN start_wifi_task */
+  /* Infinite loop */
+  for(;;)
+  {
+    uint16_t message = 0;
+    osMessageQueueGet(joystickEventQueueHandle, &message, 0, osWaitForever);
+
+    switch (message)
+    {
+    	case JOYSTICK_UP:
+    		HAL_UART_Transmit(&huart2, (uint8_t *) "Up!\r\n", strlen("Up!\r\n"), 1000);
+    		//sendHttpPost("192.168.43.198", "/api/challenges", 1, message);
+    		break;
+    	case JOYSTICK_LEFT:
+    		HAL_UART_Transmit(&huart2, (uint8_t *) "Left!\r\n", strlen("Left!\r\n"), 1000);
+    		//sendHttpPost("192.168.43.198", "/api/challenges", 1, message);
+    		break;
+    	case JOYSTICK_RIGHT:
+    		HAL_UART_Transmit(&huart2, (uint8_t *) "Right\r\n", strlen("Right\r\n"), 1000);
+    		//sendHttpPost("192.168.43.198", "/api/challenges", 1, message);
+    		break;
+    	default:
+    		HAL_UART_Transmit(&huart2, (uint8_t *) "Error: illegal joystick queue message\r\n", strlen("Error: illegal joystick queue message\r\n"), 1000);
+    		break;
+    }
+  }
+  /* USER CODE END start_wifi_task */
 }
 
 /**
