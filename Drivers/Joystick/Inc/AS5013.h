@@ -23,10 +23,6 @@
 /* To be or'd with an internal register address when repeated reads are needed */
 #define AS5013_AUTO_INCREMENT_DISABLE (1 << 6)
 
-extern UART_HandleTypeDef huart2;
-
-void AS5013_hello_world(uint8_t *echo);
-
 /**
  * @brief Reads a single byte from a specified register on the AS5013.
  *

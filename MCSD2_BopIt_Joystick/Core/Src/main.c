@@ -24,6 +24,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "AS5013.h"
 /* USER CODE END Includes */
 
@@ -398,14 +399,15 @@ void StartDefaultTask(void *argument)
   /* USER CODE BEGIN 5 */
 	//HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
   /* Infinite loop */
+
+	uint8_t joystick_up_previous = 0;
+	uint8_t joystick_left_previous = 0;
+	uint8_t joystick_right_previous = 0;
   for(;;)
   {
 
-	  AS5013_hello_world((uint8_t *) "Joystick here\r\n");
-
 	  uint8_t id_code = 0;
 	  AS5013_get_id_code(&hi2c1, &id_code);
-
 
 	  uint8_t msg[50] = {0};
 
@@ -428,10 +430,63 @@ void StartDefaultTask(void *argument)
 	  sprintf((char *) msg, "X: %03d, Y: %03d\r\n", x, y);
 	  HAL_UART_Transmit(&huart2, msg, strlen((char *) msg), 1000);
 
-	  uint8_t id_msg[50] = {0};
+	  uint8_t joystick_up_current = 0;
+	  uint8_t joystick_left_current = 0;
+	  uint8_t joystick_right_current = 0;
+
+	  if ((75 <= y) && (abs(x) < 15))
+	  {
+		  joystick_up_current = 1;
+	  }
+	  else
+	  {
+		  joystick_up_current = 0;
+	  }
+
+	  if ((75 <= x) && (abs(y) < 15))
+	  {
+	  	  joystick_left_current = 1;
+	  }
+	  else
+	  {
+		  joystick_left_current = 0;
+	  }
+
+	  if ((-75 >= x) && (abs(y) < 15))
+	  {
+	   	  joystick_right_current = 1;
+	  }
+	  else
+	  {
+		  joystick_right_current = 0;
+	  }
 
 
-	  osDelay(1500);
+	  /* Rising edge */
+
+	  if (joystick_up_current && !joystick_up_previous)
+	  {
+		  /* Up */
+		  HAL_UART_Transmit(&huart1, (uint8_t *) "Up!", strlen("Up!"), 1000);
+	  }
+
+	  if (joystick_left_current && !joystick_left_previous)
+	  {
+		  /* Left */
+		  HAL_UART_Transmit(&huart1, (uint8_t *) "Left!", strlen("Left!"), 1000);
+	  }
+
+	  if (joystick_right_current && !joystick_right_previous)
+	  {
+		  /* Right */
+		  HAL_UART_Transmit(&huart1, (uint8_t *) "Right", strlen("Right"), 1000);
+	  }
+
+	  joystick_up_previous = joystick_up_current;
+	  joystick_left_previous = joystick_left_current;
+	  joystick_right_previous = joystick_right_current;
+
+	  osDelay(750);
   }
   /* USER CODE END 5 */
 }

@@ -540,6 +540,97 @@ int _write(int file, char *ptr, int len) {
 	return -1;
 }
 
+/**
+ * @brief Wrapper funtion to load the desired settings into the Si1153.
+ *
+ * @retval Returns HAL_OK if every initialisation step was successful. HAL_ERROR otherwise.
+ */
+HAL_StatusTypeDef initialize_sensor() {
+	uint16_t error_counter = 0;
+
+	if (Si1153_set_param(&hi2c1, SI1153_CHAN_LIST_PARAM_ADDR, SI1153_CHAN_LIST_DEFAULT) != HAL_OK)
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting channel list\r\n", strlen("Error setting channel list\r\n"), 1000);
+		error_counter++;
+	}
+	else
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Channel list set\r\n", strlen("Channel list set\r\n"), 1000);
+	}
+
+	if (Si1153_set_param(&hi2c1, SI1153_MEASRATE_L_PARAM_ADDR, SI1153_MEASRATE_L_DEFAULT) != HAL_OK)
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting measure rate l\r\n", strlen("Error setting measure rate l\r\n"), 1000);
+		error_counter++;
+	}
+	else
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Measure rate l set\r\n", strlen("Measure rate l set\r\n"), 1000);
+	}
+
+	if (Si1153_set_param(&hi2c1, SI1153_MEASCOUNT0_PARAM_ADDR, SI1153_MEASCOUNT0_DEFAULT) != HAL_OK)
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting measure count\r\n", strlen("Error setting measure count\r\n"), 1000);
+		error_counter++;
+	}
+	else
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Measure count set\r\n", strlen("Measure count set\r\n"), 1000);
+	}
+
+	if (Si1153_set_param(&hi2c1, SI1153_ADCCONFIG0_PARAM_ADDR, SI1153_ADCCONFIG_DEFAULT) != HAL_OK)
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting channel 0 ADC config\r\n", strlen("Error setting channel 0 ADC config\r\n"), 1000);
+		error_counter++;
+	}
+	else
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Channel 0 ADC config set\r\n", strlen("Channel 0 ADC config set\r\n"), 1000);
+	}
+
+	if (Si1153_set_param(&hi2c1, SI1153_ADCSENS0_PARAM_ADDR, SI1153_ADCSENS_DEFAULT) != HAL_OK)
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting channel 0 ADC sens\r\n", strlen("Error setting channel 0 ADC sens\r\n"), 1000);
+		error_counter++;
+	}
+	else
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Channel 0 ADC sens set\r\n", strlen("Channel 0 ADC sens set\r\n"), 1000);
+	}
+
+	if (Si1153_set_param(&hi2c1, SI1153_ADCPOST0_PARAM_ADDR, SI1153_ADCPOST_DEFAULT) != HAL_OK)
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting channel 0 ADC post\r\n", strlen("Error setting channel 0 ADC post\r\n"), 1000);
+		error_counter++;
+	}
+	else
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Channel 0 ADC post set\r\n", strlen("Channel 0 ADC post set\r\n"), 1000);
+	}
+
+	if (Si1153_set_param(&hi2c1, SI1153_MEASCONFIG0_PARAM_ADDR, SI1153_MEASCONFIG_DEFAULT) != HAL_OK)
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting channel 0 measurement config\r\n", strlen("Error setting channel 0 measurement config\r\n"), 1000);
+		error_counter++;
+	}
+	else
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Channel 0 measurement config set\r\n", strlen("Channel 0 measurement config set\r\n"), 1000);
+	}
+
+	if (Si1153_start_autonomous_mode(&hi2c1) != HAL_OK)
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Error: could not initiate autonomous measurements\r\n", strlen("Error: could not initiate autonomous measurements\r\n"), 1000);
+		error_counter++;
+	}
+	else
+	{
+		HAL_UART_Transmit(&huart2, (uint8_t *) "Autonomous measurements initiated\r\n", strlen("Autonomous measurements initiated\r\n"), 1000);
+	}
+
+	return 0 != error_counter ? HAL_ERROR : HAL_OK;
+}
+
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -558,80 +649,13 @@ void StartDefaultTask(void *argument)
 	wifible_init(&huart1);
 	connectWifi("Florian Handy", "florianparzer");
 
-
-	if (Si1153_set_param(&hi2c1, SI1153_CHAN_LIST_PARAM_ADDR, SI1153_CHAN_LIST_DEFAULT) != HAL_OK)
+	while(1)
 	{
-		HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting channel list\r\n", strlen("Error setting channel list\r\n"), 1000);
+		if (initialize_sensor() == HAL_OK)
+		{
+			break;
+		}
 	}
-	else
-	{
-		HAL_UART_Transmit(&huart2, (uint8_t *) "Channel list set\r\n", strlen("Channel list set\r\n"), 1000);
-	}
-
-	if (Si1153_set_param(&hi2c1, SI1153_MEASRATE_L_PARAM_ADDR, SI1153_MEASRATE_L_DEFAULT) != HAL_OK)
-	{
-		HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting measure rate l\r\n", strlen("Error setting measure rate l\r\n"), 1000);
-	}
-	else
-	{
-		HAL_UART_Transmit(&huart2, (uint8_t *) "Measure rate l set\r\n", strlen("Measure rate l set\r\n"), 1000);
-	}
-
-	if (Si1153_set_param(&hi2c1, SI1153_MEASCOUNT0_PARAM_ADDR, SI1153_MEASCOUNT0_DEFAULT) != HAL_OK)
-	{
-		HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting measure count\r\n", strlen("Error setting measure count\r\n"), 1000);
-	}
-	else
-	{
-		HAL_UART_Transmit(&huart2, (uint8_t *) "Measure count set\r\n", strlen("Measure count set\r\n"), 1000);
-	}
-
-	if (Si1153_set_param(&hi2c1, SI1153_ADCCONFIG0_PARAM_ADDR, SI1153_ADCCONFIG_DEFAULT) != HAL_OK)
-	{
-		HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting channel 0 ADC config\r\n", strlen("Error setting channel 0 ADC config\r\n"), 1000);
-	}
-	else
-	{
-		HAL_UART_Transmit(&huart2, (uint8_t *) "Channel 0 ADC config set\r\n", strlen("Channel 0 ADC config set\r\n"), 1000);
-	}
-
-	if (Si1153_set_param(&hi2c1, SI1153_ADCSENS0_PARAM_ADDR, SI1153_ADCSENS_DEFAULT) != HAL_OK)
-	{
-		HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting channel 0 ADC sens\r\n", strlen("Error setting channel 0 ADC sens\r\n"), 1000);
-	}
-	else
-	{
-		HAL_UART_Transmit(&huart2, (uint8_t *) "Channel 0 ADC sens set\r\n", strlen("Channel 0 ADC sens set\r\n"), 1000);
-	}
-
-	if (Si1153_set_param(&hi2c1, SI1153_ADCPOST0_PARAM_ADDR, SI1153_ADCPOST_DEFAULT) != HAL_OK)
-	{
-		HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting channel 0 ADC post\r\n", strlen("Error setting channel 0 ADC post\r\n"), 1000);
-	}
-	else
-	{
-		HAL_UART_Transmit(&huart2, (uint8_t *) "Channel 0 ADC post set\r\n", strlen("Channel 0 ADC post set\r\n"), 1000);
-	}
-
-	if (Si1153_set_param(&hi2c1, SI1153_MEASCONFIG0_PARAM_ADDR, SI1153_MEASCONFIG_DEFAULT) != HAL_OK)
-	{
-		HAL_UART_Transmit(&huart2, (uint8_t *) "Error setting channel 0 measurement config\r\n", strlen("Error setting channel 0 measurement config\r\n"), 1000);
-	}
-	else
-	{
-		HAL_UART_Transmit(&huart2, (uint8_t *) "Channel 0 measurement config set\r\n", strlen("Channel 0 measurement config set\r\n"), 1000);
-	}
-
-	if (Si1153_start_autonomous_mode(&hi2c1) != HAL_OK)
-	{
-		HAL_UART_Transmit(&huart2, (uint8_t *) "Error: could not initiate autonomous measurements\r\n", strlen("Error: could not initiate autonomous measurements\r\n"), 1000);
-	}
-	else
-	{
-		HAL_UART_Transmit(&huart2, (uint8_t *) "Autonomous measurements initiated\r\n", strlen("Autonomous measurements initiated\r\n"), 1000);
-	}
-
-
 
 
 	/* Infinite loop */
