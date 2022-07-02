@@ -42,8 +42,7 @@ typedef enum {
 
 /**
  * @brief Initialization function.
- * @param wifible Click object.
- * @param cfg Click configuration structure.
+ * @param uart The UART-Interface
  *
  * @description This function initializes all necessary pins and peripherals used for this click.
  */
