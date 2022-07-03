@@ -72,14 +72,36 @@ HAL_StatusTypeDef wifible_send_command(char *command);
  */
 void connectWifi(char *ssid, char *pw);
 
+/**
+ * @brief Processes the output of the command, sends it to the StdOUT and waits for the command to finish
+ */
 void wifible_process();
 
+/**
+ * @brief Sends a HTTP POST Request to a fqdn
+ * @param fqdn: Char-Pointer to the data containing the Destination of the Request
+ * @param path: Char-Pointer to the data containing the Requested Path
+ * @param id: Char-Pointer to the data containing the id of the mcu
+ * @param value: Char-Pointer to the data containing the value that will be transmitted
+ */
 void sendHttpPost(char *fqdn, char *path, int id, int value);
 
+/**
+ * @brief Initializes DMA Receive and sets the UART Handle
+ * @param huart: UART-Handle for the communication with the WIFI-Modul
+ */
 void msgrx_init(UART_HandleTypeDef *huart);
 
+/**
+ * @brief Checks if the Buffer contains new Elements
+ * @return returns a boolean value
+ */
 static bool msgrxIsEmpty(void);
 
+/**
+ * @brief Reads one new element
+ * @return returns a uint8 Value of the new element
+ */
 static uint8_t msgrxGet(void);
 
 #endif /* INC_WIFIBLE_H_ */
