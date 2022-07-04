@@ -547,15 +547,15 @@ void start_wifi_dispatcher_task(void *argument)
     	switch (message)
     	{
     	case CY8C201A0_CAPSENSE_0_CONFIG_TOP:
-    		sendHttpPost("172.20.10.13", "/api/challanges", 1, TOUCH_TOP);
+    		sendHttpPost("192.168.43.198", "/api/challenges", 1, TOUCH_TOP);
     		HAL_UART_Transmit(&huart2, (uint8_t*) "Top button pressed\r\n", strlen("Top button pressed\r\n"), 1000);
     		break;
     	case CY8C201A0_CAPSENSE_0_CONFIG_BOTTOM:
-    		sendHttpPost("172.20.10.13", "/api/challanges", 1, TOUCH_BOTTOM);
+    		sendHttpPost("192.168.43.198", "/api/challenges", 1, TOUCH_BOTTOM);
     		HAL_UART_Transmit(&huart2, (uint8_t*) "Bottom button pressed\r\n", strlen("Bottom button pressed\r\n"), 1000);
     		break;
     	case CY8C201A0_CAPSENSE_1_CONFIG_ALL:
-    		sendHttpPost("172.20.10.13", "/api/challanges", 1, TOUCH_MID);
+    		sendHttpPost("192.168.43.198", "/api/challenges", 1, TOUCH_MID);
     		HAL_UART_Transmit(&huart2, (uint8_t*) "Mid button pressed\r\n", strlen("Mid button pressed\r\n"), 1000);
     		break;
     	default:
